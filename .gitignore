@@ -30,3 +30,4 @@ crashlytics-build.properties
 .superpowers/
 .vs/
 .idea/
+/.utmp/

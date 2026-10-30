@@ -223,6 +223,15 @@ namespace OrbitalCargo.Shift.EditorTools
                 pools.GetArrayElementAtIndex(i).objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(poolPaths[i]);
             bso.ApplyModifiedPropertiesWithoutUndo();
 
+            // Kit frame-rate setter capped at a steady 60 on every tier: smooth and cool for a live demo,
+            // rather than chasing a 120 Hz panel and throttling halfway through the pitch.
+            var fps = systems.AddComponent<GameKit.AppFlow.FrameRateSetter>();
+            fps.matchPanelRefreshRate = false;
+            fps.ultraFPS = 60;
+            fps.highFPS = 60;
+            fps.midFPS = 60;
+            fps.lowFPS = 60;
+
             var juice = systems.AddComponent<JuicePresenter>();
             var jso = new SerializedObject(juice);
             jso.FindProperty("sound").objectReferenceValue = CoreAssetFactory.Load<SoundService>(CoreAssetFactory.SoundsPath);
