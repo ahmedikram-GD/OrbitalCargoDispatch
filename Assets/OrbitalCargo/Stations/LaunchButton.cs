@@ -27,6 +27,8 @@ namespace OrbitalCargo.Stations
 
         private MaterialPropertyBlock _block;
 
+        public ShuttleLauncher Launcher => launcher;
+
         // ── Lifecycle ──────────────────────────────────────────────────────────
 
         private void Update()

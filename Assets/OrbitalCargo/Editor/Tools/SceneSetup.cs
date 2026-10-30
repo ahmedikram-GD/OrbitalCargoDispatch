@@ -124,6 +124,18 @@ namespace OrbitalCargo.Shift.EditorTools
             jso.FindProperty("onShuttleLaunched").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
             jso.FindProperty("launchShake").objectReferenceValue = CoreAssetFactory.Load<CameraShakeProfileSO>(CoreAssetFactory.LaunchShakePath);
             jso.ApplyModifiedPropertiesWithoutUndo();
+
+            // Editor test aid: F fills the aimed-at bay.
+            var filler = systems.AddComponent<Stations.BayDebugFiller>();
+            var fso = new SerializedObject(filler);
+            fso.FindProperty("interactor").objectReferenceValue = player.GetComponent<CrateInteractor>();
+            fso.FindProperty("cratePooler").objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(CoreAssetFactory.CratePoolerPath);
+            string[] types = { "CT_Standard", "CT_Cryo", "CT_Volatile", "CT_Junk" };
+            var typesProp = fso.FindProperty("crateTypes");
+            typesProp.arraySize = types.Length;
+            for (int i = 0; i < types.Length; i++)
+                typesProp.GetArrayElementAtIndex(i).objectReferenceValue = CrateAssetFactory.LoadType(types[i]);
+            fso.ApplyModifiedPropertiesWithoutUndo();
         }
 
         // Slice 2 stand-in for the spawner: a standard, a cryo and a volatile crate resting on the belt.
