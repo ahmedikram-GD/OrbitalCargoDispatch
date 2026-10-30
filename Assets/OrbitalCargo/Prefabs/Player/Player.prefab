@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 3283436486808102727}
   - component: {fileID: 410445580417901844}
   - component: {fileID: 694940966645647756}
+  - component: {fileID: 8613895525026901988}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -183,6 +184,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.FirstPerson.CameraBobController
   config: {fileID: 11400000, guid: 01b05a32c5a8a414c8dbc269b979a574, type: 2}
+--- !u!114 &8613895525026901988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000299315531388634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04c93bb5fb17d8140a36c0e8ea29ed4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Juice.CameraShaker
+  intensity: 1
 --- !u!1 &8823348177385490186
 GameObject:
   m_ObjectHideFlags: 0

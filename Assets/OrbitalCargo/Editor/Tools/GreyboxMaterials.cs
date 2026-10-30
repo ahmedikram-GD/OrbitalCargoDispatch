@@ -42,6 +42,37 @@ namespace OrbitalCargo.Room.EditorTools
             return mat;
         }
 
+        /// <summary>Soft alpha-blended URP particle material using Unity's built-in round particle texture.</summary>
+        public static Material GetParticle(string role, Color tint)
+        {
+            string path = $"{Folder}/M_{role}.mat";
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (existing != null) return existing;
+
+            Directory.CreateDirectory(Folder);
+            var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            if (shader == null)
+            {
+                Debug.LogError("[GreyboxMaterials] URP Particles/Unlit shader not found.");
+                return null;
+            }
+
+            var mat = new Material(shader) { name = $"M_{role}" };
+            mat.SetTexture("_BaseMap", AssetDatabase.GetBuiltinExtraResource<Texture2D>("Default-Particle.psd"));
+            mat.SetColor("_BaseColor", tint);
+            mat.SetFloat("_Surface", 1f);
+            mat.SetFloat("_Blend", 0f);
+            mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+
+            AssetDatabase.CreateAsset(mat, path);
+            return mat;
+        }
+
         /// <summary>
         /// Alpha-blended URP Unlit material (ghosts, x-ray casing previews). Alpha comes from
         /// <paramref name="color"/>.a. Created once like <see cref="Get"/>.

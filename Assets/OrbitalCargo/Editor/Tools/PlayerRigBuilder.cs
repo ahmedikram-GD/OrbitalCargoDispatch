@@ -62,6 +62,7 @@ namespace OrbitalCargo.FirstPerson.EditorTools
             camGo.AddComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
             camGo.AddComponent<AudioListener>();
             var bob = camGo.AddComponent<CameraBobController>();
+            camGo.AddComponent<Juice.CameraShaker>();
 
             // Crate pivot is its bottom centre, so this is where the bottom of a carried crate sits:
             // low and to the right, clear of the crosshair.

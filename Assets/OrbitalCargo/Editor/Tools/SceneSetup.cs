@@ -1,11 +1,17 @@
+using GameKit.Architecture.PoolSystem;
+using GameKit.Haptics;
 using OrbitalCargo.Crates;
 using OrbitalCargo.Crates.EditorTools;
+using OrbitalCargo.Economy;
 using OrbitalCargo.FirstPerson;
 using OrbitalCargo.FirstPerson.EditorTools;
 using OrbitalCargo.Interaction;
+using OrbitalCargo.Juice;
 using OrbitalCargo.Room.EditorTools;
 using OrbitalCargo.Stations.EditorTools;
 using OrbitalCargo.UI;
+using OrbitalCargo.UI.EditorTools;
+using THEBADDEST.SoundSystem;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -25,6 +31,7 @@ namespace OrbitalCargo.Shift.EditorTools
     {
         public const string GameScenePath = "Assets/OrbitalCargo/Scenes/Game.unity";
         private const string TempCratesName = "TempCrates";
+        private const string SystemsName = "Systems";
 
         [MenuItem("Tools/OrbitalCargo/Setup Game Scene")]
         public static void SetupGameScene()
@@ -39,27 +46,33 @@ namespace OrbitalCargo.Shift.EditorTools
             var scene = EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Single);
 
             CrateAssetFactory.CreateAll();
+            CoreAssetFactory.CreateAll();
 
             var layout = RoomBuilder.LoadOrCreateDefaultLayout();
             var room = RoomBuilder.Build(layout);
             StationWiring.Wire(layout, room.transform);
 
             PlayerRigBuilder.BuildPrefabs();
+            HudBuilder.BuildHudPrefab();
 
             // Template camera is replaced by the camera inside the Player prefab.
             DestroyIfPresent("Main Camera");
             DestroyIfPresent("Player");
             DestroyIfPresent("Controls");
+            DestroyIfPresent("Hud");
             DestroyIfPresent("EventSystem");
+            DestroyIfPresent(SystemsName);
             DestroyIfPresent(TempCratesName);
 
             var player = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PlayerRigBuilder.PlayerPrefabPath));
             player.transform.SetPositionAndRotation(layout.PlayerSpawn, Quaternion.Euler(0f, layout.PlayerYaw, 0f));
 
             var controls = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PlayerRigBuilder.ControlsPrefabPath));
+            PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(HudBuilder.HudPrefabPath));
             PlayerRigBuilder.CreateEventSystem();
 
             WireControls(player, controls);
+            BuildSystems(player);
             PlaceTempCrates(layout);
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -82,6 +95,35 @@ namespace OrbitalCargo.Shift.EditorTools
             ctx.FindProperty("interactor").objectReferenceValue = player.GetComponent<CrateInteractor>();
             ctx.FindProperty("input").objectReferenceValue = player.GetComponent<InteractionInputProvider>();
             ctx.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // Scene-level services: the bootstrap (sound + pools) and the juice presenter (events → feedback).
+        private static void BuildSystems(GameObject player)
+        {
+            var systems = new GameObject(SystemsName);
+
+            var bootstrap = systems.AddComponent<GameBootstrap>();
+            var bso = new SerializedObject(bootstrap);
+            bso.FindProperty("soundService").objectReferenceValue = CoreAssetFactory.Load<SoundService>(CoreAssetFactory.SoundsPath);
+            var pools = bso.FindProperty("pools");
+            string[] poolPaths = { CoreAssetFactory.CratePoolerPath, CoreAssetFactory.ParticlesPoolerPath, CoreAssetFactory.UIPoolerPath };
+            pools.arraySize = poolPaths.Length;
+            for (int i = 0; i < poolPaths.Length; i++)
+                pools.GetArrayElementAtIndex(i).objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(poolPaths[i]);
+            bso.ApplyModifiedPropertiesWithoutUndo();
+
+            var juice = systems.AddComponent<JuicePresenter>();
+            var jso = new SerializedObject(juice);
+            jso.FindProperty("sound").objectReferenceValue = CoreAssetFactory.Load<SoundService>(CoreAssetFactory.SoundsPath);
+            jso.FindProperty("haptics").objectReferenceValue = CoreAssetFactory.Load<HapticHandlerSO>(CoreAssetFactory.HapticsPath);
+            jso.FindProperty("particles").objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(CoreAssetFactory.ParticlesPoolerPath);
+            jso.FindProperty("shaker").objectReferenceValue = player.GetComponentInChildren<CameraShaker>(true);
+            jso.FindProperty("bob").objectReferenceValue = player.GetComponentInChildren<CameraBobController>(true);
+            jso.FindProperty("onCratePicked").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CratePicked");
+            jso.FindProperty("onCratePlaced").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CratePlaced");
+            jso.FindProperty("onShuttleLaunched").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
+            jso.FindProperty("launchShake").objectReferenceValue = CoreAssetFactory.Load<CameraShakeProfileSO>(CoreAssetFactory.LaunchShakePath);
+            jso.ApplyModifiedPropertiesWithoutUndo();
         }
 
         // Slice 2 stand-in for the spawner: a standard, a cryo and a volatile crate resting on the belt.

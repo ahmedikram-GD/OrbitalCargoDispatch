@@ -146,6 +146,28 @@ namespace OrbitalCargo.Room.EditorTools
             // Tall coloured backboard so the bay reads from across the room. It sits on the pad's local -Z:
             // bays face the room (Yaw 180), so local +Z points INTO the room and would wall off the pad.
             Box("Backboard", bay, new Vector3(0f, 1.5f, -(padD * 0.5f + 0.2f)), new Vector3(padW, 3f, 0.2f), padMat, local: true);
+
+            // Shuttle cradle over the pad: side rails, struts, a canopy above head height and two engine
+            // pods. Visual only (no colliders) — it flies away with the cargo at launch.
+            var shuttle = Group("Shuttle", bay, local: true);
+            var hull = GreyboxMaterials.Get("ShuttleHull", new Color(0.78f, 0.8f, 0.84f));
+            var engine = GreyboxMaterials.Get("ShuttleEngine", new Color(1f, 0.45f, 0.1f), emission: 1.5f);
+            float railX = padW * 0.5f + 0.12f;
+            Box("RailLeft", shuttle, new Vector3(-railX, 0.3f, 0f), new Vector3(0.18f, 0.6f, padD), hull, local: true, collider: false);
+            Box("RailRight", shuttle, new Vector3(railX, 0.3f, 0f), new Vector3(0.18f, 0.6f, padD), hull, local: true, collider: false);
+            Box("StrutLeft", shuttle, new Vector3(-railX, 1.2f, -padD * 0.5f + 0.1f), new Vector3(0.15f, 1.8f, 0.15f), hull, local: true, collider: false);
+            Box("StrutRight", shuttle, new Vector3(railX, 1.2f, -padD * 0.5f + 0.1f), new Vector3(0.15f, 1.8f, 0.15f), hull, local: true, collider: false);
+            Box("Canopy", shuttle, new Vector3(0f, 2.05f, -0.2f), new Vector3(padW + 0.5f, 0.3f, padD + 0.4f), hull, local: true, collider: false);
+            Box("EngineLeft", shuttle, new Vector3(-padW * 0.3f, 2.35f, 0f), new Vector3(0.5f, 0.3f, 0.9f), engine, local: true, collider: false);
+            Box("EngineRight", shuttle, new Vector3(padW * 0.3f, 2.35f, 0f), new Vector3(0.5f, 0.3f, 0.9f), engine, local: true, collider: false);
+            foreach (var r in shuttle.GetComponentsInChildren<Renderer>()) r.gameObject.isStatic = false; // it moves
+
+            // Launch pedestal at the pad's front corner (room side = local +Z).
+            var launchPad = Group("LaunchPad", bay, local: true);
+            launchPad.localPosition = new Vector3(padW * 0.5f - 0.2f, 0f, padD * 0.5f + 0.6f);
+            Box("Pedestal", launchPad, new Vector3(0f, 0.55f, 0f), new Vector3(0.5f, 1.1f, 0.5f), GreyboxMaterials.Get("Pedestal", new Color(0.25f, 0.27f, 0.3f)), local: true);
+            Box("Lamp", launchPad, new Vector3(0f, 1.16f, 0f), new Vector3(0.42f, 0.12f, 0.42f),
+                GreyboxMaterials.Get("LaunchLamp", new Color(0.2f, 1f, 0.4f), emission: 0.2f), local: true);
         }
 
         private static void BuildBooth(RoomLayoutSO layout, Transform root)

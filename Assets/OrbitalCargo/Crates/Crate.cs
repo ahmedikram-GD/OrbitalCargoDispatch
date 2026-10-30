@@ -28,6 +28,9 @@ namespace OrbitalCargo.Crates
         public bool IsBad => HiddenItem != null;
         public bool IsScanned { get; set; }
 
+        /// <summary>True once a cryo crate's ring ran out (set by the cryo timer, Slice 4). Pays less at launch.</summary>
+        public bool CryoExpired { get; set; }
+
         /// <summary>True while the player may pick this crate up.</summary>
         public bool IsPickable => State == CrateState.OnConveyor || State == CrateState.Pickable;
 
@@ -51,6 +54,7 @@ namespace OrbitalCargo.Crates
             IsSuspicious = suspicious;
             HiddenItem = hidden;
             IsScanned = false;
+            CryoExpired = false;
             if (visuals != null) visuals.Apply(type);
             State = CrateState.OnConveyor;
             StateChanged?.Invoke(this, State);

@@ -20,6 +20,12 @@ namespace OrbitalCargo.Crates
         private Coroutine _move;
         private Vector3 _baseScale;
 
+        // The in-flight move's destination, so CompleteMove can land it instantly.
+        private Transform _moveHolder;
+        private Vector3 _moveOffset;
+        private Vector3 _moveScale;
+        private Action _moveDone;
+
         /// <summary>True while a fly/snap move is in progress.</summary>
         public bool IsMoving => _move != null;
 
@@ -62,6 +68,19 @@ namespace OrbitalCargo.Crates
             transform.SetParent(null, true);
         }
 
+        /// <summary>
+        /// Land an in-flight move right now (final pose + its completion callback). Call before another
+        /// system takes the crate — e.g. a launch the same moment the last crate is still snapping in,
+        /// whose snap would otherwise finish later by re-parenting the crate off the departing shuttle.
+        /// </summary>
+        public void CompleteMove()
+        {
+            if (_move == null) return;
+            StopCoroutine(_move);
+            _move = null;
+            Land(_moveHolder, _moveOffset, _moveScale, _moveDone);
+        }
+
         /// <summary>Put the crate straight onto <paramref name="anchor"/> at full size with colliders on (pool reuse, editor placement).</summary>
         public void PlaceImmediate(Transform anchor)
         {
@@ -79,6 +98,10 @@ namespace OrbitalCargo.Crates
         {
             StopMove();
             transform.SetParent(null, true);
+            _moveHolder = holder;
+            _moveOffset = localOffset;
+            _moveScale = targetScale;
+            _moveDone = onDone;
             _move = StartCoroutine(MoveRoutine(holder, localOffset, targetScale, duration, arcHeight, onDone));
         }
 
@@ -107,6 +130,11 @@ namespace OrbitalCargo.Crates
             }
 
             _move = null;
+            Land(holder, localOffset, targetScale, onDone);
+        }
+
+        private void Land(Transform holder, Vector3 localOffset, Vector3 targetScale, Action onDone)
+        {
             if (holder != null)
             {
                 transform.SetParent(holder, false);

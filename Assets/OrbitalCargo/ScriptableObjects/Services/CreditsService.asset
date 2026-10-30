@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fdc09b3826b8cf45aa63e9f217c16cb, type: 3}
+  m_Name: CreditsService
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Economy.CreditsService
+  credits: {fileID: 11400000, guid: 2082da3db4113cb418602ab486af3b5d, type: 2}
+  balanceChanged: {fileID: 11400000, guid: bdb266c77b1e65c419d9156d58054695, type: 2}

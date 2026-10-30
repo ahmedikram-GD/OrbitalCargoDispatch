@@ -34,6 +34,9 @@ namespace OrbitalCargo.Stations
         public BayModel Model => _model;
         public IReadOnlyList<Slot> Slots => slots;
 
+        /// <summary>Set by the shuttle launcher while its shuttle is away: nothing can be placed.</summary>
+        public bool IsLocked { get; set; }
+
         /// <summary>Raised when a crate is placed or the bay is emptied.</summary>
         public event Action<Bay> Changed;
 
@@ -59,11 +62,11 @@ namespace OrbitalCargo.Stations
 
         public string Prompt(CrateCarrier carrier)
         {
-            if (carrier == null || !carrier.HasCrate || config == null) return string.Empty;
+            if (carrier == null || !carrier.HasCrate || config == null || IsLocked) return string.Empty;
             return _model.IsFull ? config.BayFullPrompt : config.PlacePrompt;
         }
 
-        public bool CanInteract(CrateCarrier carrier) => carrier != null && carrier.HasCrate && !_model.IsFull;
+        public bool CanInteract(CrateCarrier carrier) => carrier != null && carrier.HasCrate && !_model.IsFull && !IsLocked;
 
         public void Interact(CrateCarrier carrier, RaycastHit hit)
         {
@@ -95,6 +98,21 @@ namespace OrbitalCargo.Stations
             if (crate == null || !_model.TryGetNearestFreeSlot(nearPoint, _slotPositions, out int slot)) return false;
             PlaceInSlot(crate, slot);
             return true;
+        }
+
+        /// <summary>Empty the bay: returns every slotted crate (still parented to its slot) and clears the model.</summary>
+        public List<Crate> TakeAll()
+        {
+            var crates = new List<Crate>(slots.Length);
+            foreach (var slot in slots)
+            {
+                if (slot.Occupant == null) continue;
+                crates.Add(slot.Occupant);
+                slot.Occupant = null;
+            }
+            _model.Clear();
+            Changed?.Invoke(this);
+            return crates;
         }
 
         // ── Helpers ────────────────────────────────────────────────────────────

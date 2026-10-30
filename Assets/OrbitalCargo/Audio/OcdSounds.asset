@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dca9118a5c8000d4a8e90c541798beaf, type: 3}
+  m_Name: OcdSounds
+  m_EditorClassIdentifier: GameKit.Runtime::THEBADDEST.SoundSystem.SoundService
+  sounds:
+  - soundName: Click
+    type: 1
+    audioClip: {fileID: 8300000, guid: 57419a77a0dfe4748b85305f3e108a26, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.8
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: Pickup
+    type: 0
+    audioClip: {fileID: 8300000, guid: 1ae9f8ad63c8db84c88719b13dfd9858, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.8
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: Place
+    type: 0
+    audioClip: {fileID: 8300000, guid: 1e527e7e990719b4db84849f862cbe71, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.9
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: Launch
+    type: 0
+    audioClip: {fileID: 8300000, guid: 65b48633bd0c5e747b33c87d6921a577, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.9
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: CollectSpawn
+    type: 1
+    audioClip: {fileID: 8300000, guid: edce082a527e4f94297b95c1618d434d, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.35
+    pitch: 1
+    useRandomPitch: 1
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: CoinsCollect
+    type: 1
+    audioClip: {fileID: 8300000, guid: 156a5971d0dd9b2449f44e237ec32405, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.8
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: Alarm
+    type: 0
+    audioClip: {fileID: 8300000, guid: 7d9872a7b12d3d44888ae7ca2f1c9cb4, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.8
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: ScanGood
+    type: 0
+    audioClip: {fileID: 8300000, guid: 3caab531316d146a2b3597a99fc39056, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.8
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: ScanBad
+    type: 0
+    audioClip: {fileID: 8300000, guid: 1b04c3fcbe2f6b34a910297a152c8df0, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.8
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  maxConcurrentSounds: 30
+  Sound: {fileID: 11400000, guid: 5eb0c7ecad0b22a40af69165052f214f, type: 2}
+  settings: {fileID: 11400000, guid: 03864345611cac8409d6c8671cc3fe79, type: 2}

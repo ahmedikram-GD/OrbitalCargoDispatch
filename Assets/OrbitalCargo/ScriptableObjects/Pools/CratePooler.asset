@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a325d613c65bd8a44a7b77d71af6cd6b, type: 3}
+  m_Name: CratePooler
+  m_EditorClassIdentifier: GameKit.Runtime::GameKit.Architecture.PoolSystem.PoolManagerSO
+  _poolConfigs:
+  - PoolID: Crate
+    Prefab: {fileID: 7046059071509205978, guid: f4ad1c46d0d73a74485ddcab8cf32bdf, type: 3}
+    DefaultCapacity: 24
+    MaxSize: 64
+    Prewarm: 0

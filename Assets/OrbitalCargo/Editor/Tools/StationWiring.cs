@@ -1,8 +1,12 @@
 using System;
+using GameKit.Architecture.PoolSystem;
 using OrbitalCargo.Config;
 using OrbitalCargo.Crates.EditorTools;
+using OrbitalCargo.Economy;
 using OrbitalCargo.Interaction;
 using OrbitalCargo.Room.EditorTools;
+using OrbitalCargo.Shift.EditorTools;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 
@@ -76,6 +80,57 @@ namespace OrbitalCargo.Stations.EditorTools
             so.FindProperty("ghost").objectReferenceValue = ghost;
             so.FindProperty("config").objectReferenceValue = config;
             so.FindProperty("onCratePlaced").objectReferenceValue = onPlaced;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            WireLaunch(bayTransform, bay, config);
+            WireFillCounter(bayTransform, bay);
+        }
+
+        // Slice 3: shuttle launcher on the bay, launch button on its pedestal.
+        private static void WireLaunch(Transform bayTransform, Bay bay, InteractionConfigSO config)
+        {
+            var launcher = bayTransform.gameObject.AddComponent<ShuttleLauncher>();
+            var so = new SerializedObject(launcher);
+            so.FindProperty("bay").objectReferenceValue = bay;
+            so.FindProperty("shuttle").objectReferenceValue = bayTransform.Find("Shuttle");
+            so.FindProperty("config").objectReferenceValue = CoreAssetFactory.Load<ShiftConfigSO>(CoreAssetFactory.ShiftConfigPath);
+            so.FindProperty("credits").objectReferenceValue = CoreAssetFactory.Load<CreditsService>(CoreAssetFactory.CreditsServicePath);
+            so.FindProperty("cratePooler").objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(CoreAssetFactory.CratePoolerPath);
+            so.FindProperty("onShuttleLaunched").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            var padTransform = bayTransform.Find("LaunchPad");
+            if (padTransform == null) return;
+            var button = padTransform.gameObject.AddComponent<LaunchButton>();
+            var bso = new SerializedObject(button);
+            bso.FindProperty("launcher").objectReferenceValue = launcher;
+            bso.FindProperty("config").objectReferenceValue = config;
+            bso.FindProperty("lamp").objectReferenceValue = padTransform.Find("Lamp")?.GetComponent<Renderer>();
+            bso.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // World-space "0 / 6" on the backboard's room-facing side, above the cradle canopy.
+        private static void WireFillCounter(Transform bayTransform, Bay bay)
+        {
+            var backboard = bayTransform.Find("Backboard");
+            float frontZ = backboard != null ? backboard.localPosition.z + backboard.localScale.z * 0.5f + 0.02f : 0f;
+
+            var go = new GameObject("FillCounter");
+            go.transform.SetParent(bayTransform, false);
+            go.transform.localPosition = new Vector3(0f, 2.75f, frontZ);
+            go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f); // read from the room (bay local +Z)
+
+            var label = go.AddComponent<TextMeshPro>();
+            label.rectTransform.sizeDelta = new Vector2(3f, 0.6f);
+            label.fontSize = 5f;
+            label.fontStyle = FontStyles.Bold;
+            label.alignment = TextAlignmentOptions.Center;
+            label.text = "0 / 6";
+
+            var view = go.AddComponent<BayFillCounterView>();
+            var so = new SerializedObject(view);
+            so.FindProperty("bay").objectReferenceValue = bay;
+            so.FindProperty("label").objectReferenceValue = label;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
     }

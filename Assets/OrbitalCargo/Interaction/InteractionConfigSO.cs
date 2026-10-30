@@ -37,5 +37,6 @@ namespace OrbitalCargo.Interaction
         public string PlacePrompt = "Place";
         public string BayFullPrompt = "Bay full";
         public string HandsFullPrompt = "Hands full";
+        public string LaunchPrompt = "Launch";
     }
 }
