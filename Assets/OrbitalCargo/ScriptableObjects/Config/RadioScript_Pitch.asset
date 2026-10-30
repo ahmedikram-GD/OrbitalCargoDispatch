@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16ac27e855a64334a9ecb9e2ac5b77c6, type: 3}
+  m_Name: RadioScript_Pitch
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Radio.RadioScriptSO
+  Lines:
+  - Beat: Intro
+    Speaker: ROOK
+    Text: "Evening, rookie. Grey crate on the belt \u2014 grab it and walk it to
+      Bay A, the grey one."
+    HoldSeconds: 5
+  - Beat: FirstPlace
+    Speaker: ROOK
+    Text: Slot's lit. Fill all six and hit the big green button.
+    HoldSeconds: 4
+  - Beat: FirstLaunch
+    Speaker: ROOK
+    Text: "There she goes. Credits in your account \u2014 don't spend it all."
+    HoldSeconds: 4
+  - Beat: CryoIntro
+    Speaker: ROOK
+    Text: "White crates are cryo. Bay B, and move \u2014 that ring runs out."
+    HoldSeconds: 4.5
+  - Beat: Suspicious
+    Speaker: ROOK
+    Text: "That one looks off\u2026 take it to the booth and scan it."
+    HoldSeconds: 4.5
+  - Beat: Junk
+    Speaker: ROOK
+    Text: Rusty junk goes down the chute. Swipe it in.
+    HoldSeconds: 4
+  - Beat: Volatile
+    Speaker: ROOK
+    Text: 'Yellow chevrons: volatile. Bay C, slow and steady.'
+    HoldSeconds: 4
+  - Beat: ShiftStart
+    Speaker: ROOK
+    Text: "Back for more? Belt's running hot tonight \u2014 keep up."
+    HoldSeconds: 4
+  - Beat: ShiftEnd
+    Speaker: ROOK
+    Text: Shift's over. Not bad for a first night.
+    HoldSeconds: 5

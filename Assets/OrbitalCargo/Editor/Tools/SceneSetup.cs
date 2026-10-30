@@ -12,6 +12,8 @@ using OrbitalCargo.Flow;
 using OrbitalCargo.Flow.EditorTools;
 using OrbitalCargo.Interaction;
 using OrbitalCargo.Juice;
+using OrbitalCargo.Radio;
+using OrbitalCargo.Radio.EditorTools;
 using OrbitalCargo.Room.EditorTools;
 using OrbitalCargo.Stations;
 using OrbitalCargo.Stations.EditorTools;
@@ -90,6 +92,7 @@ namespace OrbitalCargo.Shift.EditorTools
             WireControls(player, controls, room.transform);
             var systems = BuildSystems(player, room.transform);
             BuildFlow(systems, player, room.transform, statesRoot, uiStatesRoot);
+            BuildRadio(systems, room.transform);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -238,6 +241,12 @@ namespace OrbitalCargo.Shift.EditorTools
             jso.FindProperty("onItemCollected").objectReferenceValue = CrateAssetFactory.EnsureHiddenItemEvent("e_ItemCollected");
             jso.FindProperty("onNewsAlert").objectReferenceValue = CoreAssetFactory.LoadEvent<GameKit.Architecture.Events.GameEventWithString>("e_NewsAlert");
             jso.FindProperty("launchShake").objectReferenceValue = CoreAssetFactory.Load<CameraShakeProfileSO>(CoreAssetFactory.LaunchShakePath);
+            jso.FindProperty("config").objectReferenceValue = CoreAssetFactory.Load<Config.ShiftConfigSO>(CoreAssetFactory.ShiftConfigPath);
+            jso.FindProperty("radioScript").objectReferenceValue = Radio.EditorTools.RadioAssetFactory.EnsureScript();
+            jso.FindProperty("onRadioBeat").objectReferenceValue = CoreAssetFactory.LoadEvent<GameKit.Architecture.Events.GameEventWithString>("e_RadioBeat");
+            jso.FindProperty("onShiftEnded").objectReferenceValue = FlowAssetFactory.Event<GameEvent>("e_ShiftEnded");
+            AssignEvents(jso.FindProperty("onUiPressed"), "e_PausePressed", "e_ResumePressed", "e_NextShiftPressed");
+            AssignEvents(jso.FindProperty("onPurchase"), "e_DoublePayoutClaimed", "e_UpgradePurchased");
             jso.ApplyModifiedPropertiesWithoutUndo();
 
             // Editor test aid: 1-4 drop a standard / cryo / junk / volatile crate on the belt.
@@ -273,6 +282,35 @@ namespace OrbitalCargo.Shift.EditorTools
                 typesProp.GetArrayElementAtIndex(i).objectReferenceValue = CrateAssetFactory.LoadType(types[i]);
             fso.ApplyModifiedPropertiesWithoutUndo();
             return systems;
+        }
+
+        private static void AssignEvents(SerializedProperty array, params string[] names)
+        {
+            array.arraySize = names.Length;
+            for (int i = 0; i < names.Length; i++)
+                array.GetArrayElementAtIndex(i).objectReferenceValue = FlowAssetFactory.Event<GameEvent>(names[i]);
+        }
+
+        // Rook: beat director + the guide arrow over Bay A.
+        private static void BuildRadio(GameObject systems, Transform room)
+        {
+            GuideArrow arrow = null;
+            foreach (var bay in room.GetComponentsInChildren<Bay>(true))
+            {
+                if (bay.Id != Config.BayId.A) continue;
+                arrow = RadioAssetFactory.BuildArrow(room, bay.transform.position + Vector3.up * 2.6f);
+                break;
+            }
+
+            var radio = new SerializedObject(systems.AddComponent<RookRadio>());
+            radio.FindProperty("session").objectReferenceValue = FlowAssetFactory.Load<ShiftSessionSO>(FlowAssetFactory.SessionPath);
+            radio.FindProperty("arrow").objectReferenceValue = arrow;
+            radio.FindProperty("onRadioBeat").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithString>("e_RadioBeat");
+            radio.FindProperty("onShiftStarted").objectReferenceValue = FlowAssetFactory.Event<GameEvent>("e_ShiftStarted");
+            radio.FindProperty("onShiftEnded").objectReferenceValue = FlowAssetFactory.Event<GameEvent>("e_ShiftEnded");
+            radio.FindProperty("onCratePlaced").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CratePlaced");
+            radio.FindProperty("onShuttleLaunched").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
+            radio.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void DestroyIfPresent(string name)

@@ -130,6 +130,58 @@ MonoBehaviour:
     minPitch: 0.95
     maxPitch: 1.05
     IsFadingOut: 0
+  - soundName: CryoBeep
+    type: 0
+    audioClip: {fileID: 8300000, guid: 7d9872a7b12d3d44888ae7ca2f1c9cb4, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.35
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: Throw
+    type: 0
+    audioClip: {fileID: 8300000, guid: 1ae9f8ad63c8db84c88719b13dfd9858, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.7
+    pitch: 1
+    useRandomPitch: 1
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: RadioBlip
+    type: 1
+    audioClip: {fileID: 8300000, guid: 57419a77a0dfe4748b85305f3e108a26, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.6
+    pitch: 1
+    useRandomPitch: 1
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: ShiftEnd
+    type: 0
+    audioClip: {fileID: 8300000, guid: 3caab531316d146a2b3597a99fc39056, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.9
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
   maxConcurrentSounds: 30
   Sound: {fileID: 11400000, guid: 5eb0c7ecad0b22a40af69165052f214f, type: 2}
   settings: {fileID: 11400000, guid: 03864345611cac8409d6c8671cc3fe79, type: 2}

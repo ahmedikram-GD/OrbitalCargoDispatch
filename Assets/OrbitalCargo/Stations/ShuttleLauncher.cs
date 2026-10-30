@@ -62,16 +62,7 @@ namespace OrbitalCargo.Stations
             _snapshots.Clear();
             foreach (var crate in cargo)
             {
-                _snapshots.Add(new CrateSnapshot
-                {
-                    BasePayout = crate.Type != null ? crate.Type.Payout : 0,
-                    Destination = crate.Type != null ? crate.Type.Destination : bay.Id,
-                    CryoExpired = crate.CryoExpired,
-                    IsBad = crate.IsBad,
-                    IsScanned = crate.IsScanned,
-                    IsJunk = crate.Type != null && crate.Type.IsJunk,
-                    Hidden = crate.HiddenItem,
-                });
+                _snapshots.Add(CrateSnapshot.Of(crate, bay.Id));
                 crate.Carryable.CompleteMove(); // a crate still snapping in must land before it boards
                 crate.SetState(CrateState.Consumed);
                 crate.transform.SetParent(shuttle, true);

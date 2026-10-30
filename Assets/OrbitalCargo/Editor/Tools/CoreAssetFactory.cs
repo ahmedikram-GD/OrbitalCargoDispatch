@@ -10,6 +10,7 @@ using OrbitalCargo.Economy;
 using OrbitalCargo.Juice;
 using OrbitalCargo.Room.EditorTools;
 using THEBADDEST.SoundSystem;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,6 +45,7 @@ namespace OrbitalCargo.Shift.EditorTools
 
         private const string LaunchSmokePrefabPath = "Assets/OrbitalCargo/Prefabs/Particles/LaunchSmoke.prefab";
         private const string UICoinPrefabPath = "Assets/OrbitalCargo/Prefabs/UI/UICoin.prefab";
+        private const string PopupPrefabPath = "Assets/OrbitalCargo/Prefabs/Particles/Popup.prefab";
         private const string SoundSettingsPath = "Assets/GameKit/Art/Sounds/SoundSettings.asset";
         private const string SoundTogglePath = "Assets/GameKit/Art/Sounds/Scriptables/Sound.asset";
         private const string ClipsFolder = "Assets/OrbitalCargo/Audio/Placeholder";
@@ -182,24 +184,49 @@ namespace OrbitalCargo.Shift.EditorTools
         private static void EnsurePools()
         {
             var crate = AssetDatabase.LoadAssetAtPath<GameObject>(CrateAssetFactory.CratePrefabPath);
-            ConfigurePool(CratePoolerPath, "Crate", crate, 24, 64, prewarm: false);
-            ConfigurePool(ParticlesPoolerPath, "LaunchSmoke", BuildLaunchSmokePrefab(), 3, 6, prewarm: true);
-            ConfigurePool(UIPoolerPath, "Coin", BuildUICoinPrefab(), 16, 48, prewarm: true);
+            ConfigurePool(CratePoolerPath, ("Crate", crate, 24, 64, false));
+            ConfigurePool(ParticlesPoolerPath,
+                ("LaunchSmoke", BuildLaunchSmokePrefab(), 3, 6, true),
+                ("Popup", BuildPopupPrefab(), 4, 10, true));
+            ConfigurePool(UIPoolerPath, ("Coin", BuildUICoinPrefab(), 16, 48, true));
         }
 
-        private static void ConfigurePool(string path, string poolId, GameObject prefab, int capacity, int max, bool prewarm)
+        private static void ConfigurePool(string path, params (string id, GameObject prefab, int capacity, int max, bool prewarm)[] pools)
         {
             var pooler = EnsureAsset<PoolManagerSO>(path);
             var so = new SerializedObject(pooler);
             var configs = so.FindProperty("_poolConfigs");
-            configs.arraySize = 1;
-            var entry = configs.GetArrayElementAtIndex(0);
-            entry.FindPropertyRelative("PoolID").stringValue = poolId;
-            entry.FindPropertyRelative("Prefab").objectReferenceValue = prefab;
-            entry.FindPropertyRelative("DefaultCapacity").intValue = capacity;
-            entry.FindPropertyRelative("MaxSize").intValue = max;
-            entry.FindPropertyRelative("Prewarm").boolValue = prewarm;
+            configs.arraySize = pools.Length;
+            for (int i = 0; i < pools.Length; i++)
+            {
+                var entry = configs.GetArrayElementAtIndex(i);
+                entry.FindPropertyRelative("PoolID").stringValue = pools[i].id;
+                entry.FindPropertyRelative("Prefab").objectReferenceValue = pools[i].prefab;
+                entry.FindPropertyRelative("DefaultCapacity").intValue = pools[i].capacity;
+                entry.FindPropertyRelative("MaxSize").intValue = pools[i].max;
+                entry.FindPropertyRelative("Prewarm").boolValue = pools[i].prewarm;
+            }
             so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // World-space comic pop ("+25 c", "CONTRABAND!") for the juice presenter.
+        private static GameObject BuildPopupPrefab()
+        {
+            var go = new GameObject("Popup");
+            var textGo = new GameObject("Text", typeof(RectTransform));
+            textGo.transform.SetParent(go.transform, false);
+            var text = textGo.AddComponent<TextMeshPro>();
+            text.text = "+25";
+            text.fontSize = 4f;
+            text.fontStyle = FontStyles.Bold;
+            text.alignment = TextAlignmentOptions.Center;
+            ((RectTransform)textGo.transform).sizeDelta = new Vector2(6f, 1.5f);
+            // TextMeshPro faces -Z; ComicPopup turns the root to look away from the camera.
+            var popup = go.AddComponent<ComicPopup>();
+            var so = new SerializedObject(popup);
+            so.FindProperty("text").objectReferenceValue = text;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return SavePrefab(go, PopupPrefabPath);
         }
 
         private static GameObject BuildLaunchSmokePrefab()
@@ -271,7 +298,12 @@ namespace OrbitalCargo.Shift.EditorTools
 
         private static void EnsureSounds()
         {
-            if (Load<SoundService>(SoundsPath) != null) return;
+            var existing = Load<SoundService>(SoundsPath);
+            if (existing != null)
+            {
+                EnsureSlice7Sounds(existing);
+                return;
+            }
 
             var service = EnsureAsset<SoundService>(SoundsPath);
             // Names are the keys gameplay uses (CLAUDE.md); CollectSpawn is hard-coded by the kit UICollector.
@@ -289,7 +321,28 @@ namespace OrbitalCargo.Shift.EditorTools
             so.FindProperty("Sound").objectReferenceValue = Load<DBBoolWithEvent>(SoundTogglePath);
             so.FindProperty("settings").objectReferenceValue = Load<SoundSettings>(SoundSettingsPath);
             so.ApplyModifiedPropertiesWithoutUndo();
+            EnsureSlice7Sounds(service);
             EditorUtility.SetDirty(service);
+        }
+
+        // Slice 7 keys, reusing the placeholder clips until real audio lands. Added only when missing,
+        // so a designer's edits to existing entries are kept.
+        private static void EnsureSlice7Sounds(SoundService service)
+        {
+            bool added = false;
+            added |= AddSoundIfMissing(service, "CryoBeep", "Alarm", SoundType.SFX, 0.35f);
+            added |= AddSoundIfMissing(service, "Throw", "Pickup", SoundType.SFX, 0.7f, randomPitch: true);
+            added |= AddSoundIfMissing(service, "RadioBlip", "Click", SoundType.UI, 0.6f, randomPitch: true);
+            added |= AddSoundIfMissing(service, "ShiftEnd", "ScanGood", SoundType.SFX, 0.9f);
+            if (added) EditorUtility.SetDirty(service);
+        }
+
+        private static bool AddSoundIfMissing(SoundService service, string name, string clipFile, SoundType type, float volume, bool randomPitch = false)
+        {
+            foreach (var sound in service)
+                if (sound != null && sound.SoundName == name) return false;
+            AddSound(service, name, clipFile, type, volume, randomPitch);
+            return true;
         }
 
         private static void AddSound(SoundService service, string name, string clipFile, SoundType type, float volume, bool randomPitch = false)

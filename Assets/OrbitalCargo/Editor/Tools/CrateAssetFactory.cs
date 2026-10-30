@@ -174,6 +174,7 @@ namespace OrbitalCargo.Crates.EditorTools
             var visuals = root.AddComponent<CrateVisuals>();
             var crate = root.AddComponent<Crate>();
             var highlight = root.AddComponent<HighlightableItem>();
+            root.AddComponent<Juice.PropShake>(); // landing wobble, triggered by JuicePresenter
 
             var casing = GameObject.CreatePrimitive(PrimitiveType.Cube);
             casing.name = "Casing";

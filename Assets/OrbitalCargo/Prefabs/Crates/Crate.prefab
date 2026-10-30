@@ -5444,6 +5444,7 @@ GameObject:
   - component: {fileID: 3061527245124402348}
   - component: {fileID: 2983496195172166605}
   - component: {fileID: 4220450636659077660}
+  - component: {fileID: 1326303128666037120}
   - component: {fileID: 6548387517356813927}
   - component: {fileID: 3835544715466694578}
   - component: {fileID: 244585576442012628}
@@ -5558,6 +5559,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Interaction.HighlightableItem
   config: {fileID: 11400000, guid: 721070fc6785a3244af773815b63a8a9, type: 2}
+--- !u!114 &1326303128666037120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7046059071509205978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44abea4b707106a42b365f97f8811627, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Juice.PropShake
+  tipAngle: 7
+  duration: 0.35
+  vibrato: 7
+  squash: 0.12
 --- !u!114 &6548387517356813927
 MonoBehaviour:
   m_ObjectHideFlags: 0

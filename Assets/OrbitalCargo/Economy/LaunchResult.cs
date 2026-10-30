@@ -14,6 +14,22 @@ namespace OrbitalCargo.Economy
         public bool IsJunk;
         /// <summary>What a bad crate hides (null when clean) — names the news headline.</summary>
         public HiddenItemSO Hidden;
+
+        /// <summary>The facts about <paramref name="crate"/> right now (destination falls back to <paramref name="fallbackBay"/> for a typeless crate).</summary>
+        public static CrateSnapshot Of(Crates.Crate crate, BayId fallbackBay = BayId.Chute)
+        {
+            var type = crate.Type;
+            return new CrateSnapshot
+            {
+                BasePayout = type != null ? type.Payout : 0,
+                Destination = type != null ? type.Destination : fallbackBay,
+                CryoExpired = crate.CryoExpired,
+                IsBad = crate.IsBad,
+                IsScanned = crate.IsScanned,
+                IsJunk = type != null && type.IsJunk,
+                Hidden = crate.HiddenItem,
+            };
+        }
     }
 
     /// <summary>What chuting one crate earns.</summary>

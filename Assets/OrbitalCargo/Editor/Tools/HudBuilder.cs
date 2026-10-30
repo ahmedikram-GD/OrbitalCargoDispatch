@@ -107,6 +107,7 @@ namespace OrbitalCargo.UI.EditorTools
 
             BuildCollectionPopup(root.transform, panelSprite, knob);
             BuildNewsBanner(root.transform, panelSprite);
+            BuildRadioCard(root.transform, panelSprite);
 
             var presenter = root.AddComponent<PayoutPopupPresenter>();
             Assign(presenter, "onShuttleLaunched", CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched"));
@@ -186,6 +187,34 @@ namespace OrbitalCargo.UI.EditorTools
             Assign(view, "onNewsAlert", CoreAssetFactory.LoadEvent<GameEventWithString>("e_NewsAlert"));
             Assign(view, "banner", banner);
             Assign(view, "label", label);
+        }
+
+        // Rook's radio card, top-left under the credits: speaker tag + typewriter line.
+        private static void BuildRadioCard(Transform root, Sprite panelSprite)
+        {
+            var card = Rect("RadioCard", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(820f, 150f), new Vector2(40f, -140f), new Vector2(0f, 1f));
+            var bg = card.gameObject.AddComponent<Image>();
+            bg.sprite = panelSprite;
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.04f, 0.1f, 0.08f, 0.85f);
+            bg.raycastTarget = false;
+            var group = card.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f;
+            group.blocksRaycasts = false;
+            group.interactable = false;
+
+            var speaker = Text("Speaker", card, new Vector2(24f, 104f), new Vector2(-24f, -8f), 30f, new Color(0.45f, 1f, 0.6f), TextAlignmentOptions.TopLeft);
+            speaker.text = "ROOK";
+            var line = Text("Line", card, new Vector2(24f, 12f), new Vector2(-24f, -46f), 32f, Color.white, TextAlignmentOptions.TopLeft);
+            line.fontStyle = FontStyles.Normal;
+            line.text = "Evening, rookie.";
+
+            var view = card.gameObject.AddComponent<RadioLineView>();
+            Assign(view, "script", Radio.EditorTools.RadioAssetFactory.EnsureScript());
+            Assign(view, "onRadioBeat", CoreAssetFactory.LoadEvent<GameEventWithString>("e_RadioBeat"));
+            Assign(view, "card", group);
+            Assign(view, "speakerText", speaker);
+            Assign(view, "lineText", line);
         }
 
         // Shift label over a mm:ss timer, top centre.

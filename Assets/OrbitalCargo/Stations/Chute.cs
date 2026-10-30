@@ -75,16 +75,7 @@ namespace OrbitalCargo.Stations
             crate.Carryable.Freeze();
             crate.SetState(CrateState.Consumed);
 
-            ChuteResult result = config != null
-                ? PayoutRules.Chute(new CrateSnapshot
-                  {
-                      BasePayout = crate.Type != null ? crate.Type.Payout : 0,
-                      IsJunk = crate.Type != null && crate.Type.IsJunk,
-                      IsBad = crate.IsBad,
-                      IsScanned = crate.IsScanned,
-                      Hidden = crate.HiddenItem,
-                  }, config)
-                : default;
+            ChuteResult result = config != null ? PayoutRules.Chute(CrateSnapshot.Of(crate), config) : default;
             if (result.Credits > 0 && credits != null) credits.Add(result.Credits);
             if (result.Collected)
             {

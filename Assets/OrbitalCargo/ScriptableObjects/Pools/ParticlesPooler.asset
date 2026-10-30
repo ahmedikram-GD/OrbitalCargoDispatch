@@ -18,3 +18,8 @@ MonoBehaviour:
     DefaultCapacity: 3
     MaxSize: 6
     Prewarm: 1
+  - PoolID: Popup
+    Prefab: {fileID: 8419832892567386254, guid: 82cfd80f3d084fd4db3feb45cf4386c8, type: 3}
+    DefaultCapacity: 4
+    MaxSize: 10
+    Prewarm: 1
