@@ -20,6 +20,7 @@ namespace OrbitalCargo.Interaction
         [SerializeField] private Transform holdPoint;
 
         private readonly List<Crate> _carried = new List<Crate>();
+        private FirstPerson.ICharacterMotor _motor;
 
         public int Capacity { get; private set; } = 1;
         public IReadOnlyList<Crate> Carried => _carried;
@@ -39,6 +40,7 @@ namespace OrbitalCargo.Interaction
             if (config == null) Debug.LogError("[CrateCarrier] No InteractionConfigSO assigned.", this);
             if (holdPoint == null) Debug.LogError("[CrateCarrier] No hold point assigned.", this);
             Capacity = config != null ? Mathf.Max(1, config.CarryCapacity) : 1;
+            _motor = GetComponent<FirstPerson.ICharacterMotor>();
         }
 
         // ── Public API ─────────────────────────────────────────────────────────
@@ -58,6 +60,7 @@ namespace OrbitalCargo.Interaction
             crate.SetState(CrateState.Carried);
             crate.Carryable.AttachTo(holdPoint, StackOffset(_carried.Count - 1), config.CarriedScale,
                                      config.FlyToHandDuration, config.FlyArcHeight);
+            ApplyCarrySpeed();
             Changed?.Invoke();
             return true;
         }
@@ -70,11 +73,22 @@ namespace OrbitalCargo.Interaction
 
             _carried.RemoveAt(_carried.Count - 1);
             crate.Carryable.Detach();
+            ApplyCarrySpeed();
             Changed?.Invoke();
             return crate;
         }
 
         // ── Helpers ────────────────────────────────────────────────────────────
+
+        // Volatile twist: the heaviest-handed crate carried sets the walk speed (lowest multiplier wins).
+        private void ApplyCarrySpeed()
+        {
+            if (_motor == null) return;
+            float multiplier = 1f;
+            foreach (var crate in _carried)
+                if (crate != null && crate.Type != null) multiplier = Mathf.Min(multiplier, crate.Type.VolatileSlowMultiplier);
+            _motor.SpeedMultiplier = multiplier;
+        }
 
         private Vector3 StackOffset(int index) => Vector3.up * (index * config.CarryStackSpacing);
     }

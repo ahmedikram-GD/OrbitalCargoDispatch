@@ -87,6 +87,13 @@ namespace OrbitalCargo.FirstPerson.EditorTools
             Assign(interactor, "carrier", carrier);
             Assign(interactor, "onCratePicked", CrateAssetFactory.EnsureCrateEvent("e_CratePicked"));
 
+            // Junk throw (Slice 4). Look area and chute are scene objects, wired by SceneSetup.
+            var thrower = root.AddComponent<JunkThrower>();
+            Assign(thrower, "carrier", carrier);
+            Assign(thrower, "config", interactionConfig);
+            Assign(thrower, "aim", camGo.transform);
+            Assign(thrower, "onCrateThrown", CrateAssetFactory.EnsureCrateEvent("e_CrateThrown"));
+
             return SavePrefab(root, PlayerPrefabPath);
         }
 

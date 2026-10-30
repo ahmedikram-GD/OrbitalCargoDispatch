@@ -16,14 +16,16 @@ namespace OrbitalCargo.Config
         [Min(10f)] public float ShiftLengthSeconds = 300f;
         [Tooltip("Belt speed in m/s.")]
         [Min(0.05f)] public float ConveyorSpeed = 0.8f;
+        [Tooltip("Centre-to-centre gap (m) crates keep on the belt; crates are 0.8 m.")]
+        [Min(0.5f)] public float ConveyorSpacing = 1.0f;
+        [Tooltip("Spawn timeline for the first (pitch) shift.")]
+        public SpawnScheduleSO Schedule;
+        [Tooltip("Faster timeline for the shifts after the first.")]
+        public SpawnScheduleSO ScheduleShift2;
 
         [Header("Crate rules")]
-        [Tooltip("Cryo ring time when a cryo CrateTypeSO leaves its own CryoSeconds at 0.")]
-        [Min(1f)] public float CryoSecondsDefault = 45f;
-        [Tooltip("Seconds the scanner booth takes to reveal a crate.")]
+        [Tooltip("Seconds the scanner booth takes to reveal a crate. (Cryo time and volatile slowdown live on their CrateTypeSO.)")]
         [Min(0.1f)] public float ScanDurationSeconds = 2.5f;
-        [Tooltip("Volatile slowdown used when a CrateTypeSO doesn't set its own.")]
-        [Range(0.1f, 1f)] public float VolatileSlowMultiplier = 0.6f;
 
         [Header("Payouts")]
         [Tooltip("Payout multiplier for a cryo crate whose ring ran out before launch.")]

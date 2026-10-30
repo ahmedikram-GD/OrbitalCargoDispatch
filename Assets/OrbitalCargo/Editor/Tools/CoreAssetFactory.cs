@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using GameKit.Architecture.Events;
 using GameKit.Architecture.PoolSystem;
@@ -53,6 +54,8 @@ namespace OrbitalCargo.Shift.EditorTools
             EnsureCredits();
             EnsureEvent<GameEvent>("e_CreditsChanged");
             EnsureEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
+            EnsureEvent<GameEventWithString>("e_RadioBeat");
+            EnsureSchedules();
             EnsureCreditsService();
             EnsureLaunchShake();
             EnsurePools();
@@ -105,6 +108,68 @@ namespace OrbitalCargo.Shift.EditorTools
             var shake = EnsureAsset<CameraShakeProfileSO>(LaunchShakePath);
             shake.Configure(0.9f, new Vector3(0.05f, 0.06f, 0f), new Vector3(1.2f, 0.8f, 1.6f), 22f);
             EditorUtility.SetDirty(shake);
+        }
+
+        // ── Schedules ──────────────────────────────────────────────────────────
+
+        public const string PitchSchedulePath = ConfigFolder + "/SpawnSchedule_Pitch.asset";
+        public const string Shift2SchedulePath = ConfigFolder + "/SpawnSchedule_Shift2.asset";
+
+        /// <summary>
+        /// The ~5-minute pitch timeline (KICKOFF table), adjusted so Bay A can be filled and launched
+        /// inside the first minute: one intro crate, then five more by ~0:40. Shift 2 is the same mix
+        /// arriving sooner and closer together. Created once, then owned by the designer.
+        /// </summary>
+        private static void EnsureSchedules()
+        {
+            var config = Load<ShiftConfigSO>(ShiftConfigPath);
+            var standard = CrateAssetFactory.LoadType("CT_Standard");
+            var cryo = CrateAssetFactory.LoadType("CT_Cryo");
+            var junk = CrateAssetFactory.LoadType("CT_Junk");
+            var volatileType = CrateAssetFactory.LoadType("CT_Volatile");
+            var egg = Load<HiddenItemSO>(CrateAssetFactory.AlienEggPath);
+
+            var pitch = Load<SpawnScheduleSO>(PitchSchedulePath);
+            if (pitch == null)
+            {
+                pitch = EnsureAsset<SpawnScheduleSO>(PitchSchedulePath);
+                pitch.Entries = new List<SpawnEntry>
+                {
+                    new SpawnEntry { Time = 3f,   Type = standard,     Count = 1, RadioBeat = "Intro" },
+                    new SpawnEntry { Time = 15f,  Type = standard,     Count = 5, Interval = 5f },
+                    new SpawnEntry { Time = 60f,  Type = standard,     Count = 6, Interval = 6f },
+                    new SpawnEntry { Time = 105f, Type = cryo,         Count = 6, Interval = 8f, RadioBeat = "CryoIntro" },
+                    new SpawnEntry { Time = 165f, Type = standard,     Count = 1, Suspicious = true, Hidden = egg, RadioBeat = "Suspicious" },
+                    new SpawnEntry { Time = 175f, Type = standard,     Count = 5, Interval = 6f },
+                    new SpawnEntry { Time = 210f, Type = junk,         Count = 3, Interval = 8f, RadioBeat = "Junk" },
+                    new SpawnEntry { Time = 240f, Type = volatileType, Count = 6, Interval = 7f, RadioBeat = "Volatile" },
+                    new SpawnEntry { Time = 270f, Type = cryo,         Count = 3, Interval = 8f },
+                };
+                EditorUtility.SetDirty(pitch);
+            }
+
+            var shift2 = Load<SpawnScheduleSO>(Shift2SchedulePath);
+            if (shift2 == null)
+            {
+                shift2 = EnsureAsset<SpawnScheduleSO>(Shift2SchedulePath);
+                shift2.Entries = new List<SpawnEntry>();
+                foreach (var e in pitch.Entries)
+                {
+                    shift2.Entries.Add(new SpawnEntry
+                    {
+                        Time = e.Time * 0.75f, Type = e.Type, Count = e.Count, Interval = e.Interval * 0.7f,
+                        Suspicious = e.Suspicious, Hidden = e.Hidden, RadioBeat = null,
+                    });
+                }
+                EditorUtility.SetDirty(shift2);
+            }
+
+            if (config != null && (config.Schedule == null || config.ScheduleShift2 == null))
+            {
+                if (config.Schedule == null) config.Schedule = pitch;
+                if (config.ScheduleShift2 == null) config.ScheduleShift2 = shift2;
+                EditorUtility.SetDirty(config);
+            }
         }
 
         // ── Pools ──────────────────────────────────────────────────────────────

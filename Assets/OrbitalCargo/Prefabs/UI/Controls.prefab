@@ -228,6 +228,8 @@ MonoBehaviour:
   sensitivity: 1
   maxTapDuration: 0.25
   maxTapMove: 20
+  maxSwipeDuration: 0.35
+  minSwipeScreenFraction: 0.12
 --- !u!1 &2289909256930792409
 GameObject:
   m_ObjectHideFlags: 0

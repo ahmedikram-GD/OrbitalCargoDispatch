@@ -38,5 +38,20 @@ namespace OrbitalCargo.Interaction
         public string BayFullPrompt = "Bay full";
         public string HandsFullPrompt = "Hands full";
         public string LaunchPrompt = "Launch";
+        public string DropPrompt = "Drop";
+
+        [Header("Junk throw")]
+        [Tooltip("The throw is guided into the chute when it's within this distance (m)...")]
+        [Min(0f)] public float ThrowAssistRange = 9f;
+        [Tooltip("...and within this angle (deg) of where the player is looking. Otherwise it's a plain throw.")]
+        [Range(0f, 180f)] public float ThrowAssistAngle = 75f;
+        [Tooltip("Horizontal speed (m/s) of a guided throw; sets its flight time.")]
+        [Min(0.5f)] public float ThrowHorizontalSpeed = 7f;
+        [Min(0.1f)] public float ThrowFlightTimeMin = 0.45f;
+        [Min(0.1f)] public float ThrowFlightTimeMax = 1.1f;
+        [Tooltip("Speed (m/s) of an unguided throw along the view.")]
+        [Min(0f)] public float FreeThrowSpeed = 7f;
+        [Tooltip("Upward lean added to an unguided throw (0 = along the view).")]
+        [Range(0f, 1f)] public float FreeThrowUpBias = 0.35f;
     }
 }

@@ -14,9 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Config.ShiftConfigSO
   ShiftLengthSeconds: 300
   ConveyorSpeed: 0.8
-  CryoSecondsDefault: 45
+  ConveyorSpacing: 1
+  Schedule: {fileID: 11400000, guid: 09a4d8a7c19adbc4a9b1ca70321335d8, type: 2}
+  ScheduleShift2: {fileID: 11400000, guid: 3a5adc89ac3821f48bc0aaab6605bd58, type: 2}
   ScanDurationSeconds: 2.5
-  VolatileSlowMultiplier: 0.6
   ExpiredCryoMultiplier: 0.4
   WrongBayMultiplier: 0.5
   ChuteBonus: 25

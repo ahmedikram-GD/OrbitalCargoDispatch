@@ -27,6 +27,12 @@ namespace OrbitalCargo.FirstPerson
         [Tooltip("Max finger travel (pixels) from press to release to still count as a tap.")]
         [SerializeField] private float maxTapMove = 20f;
 
+        [Header("Swipe detection")]
+        [Tooltip("Max seconds from press to release for a flick to count as a swipe (slower = just looking).")]
+        [SerializeField] private float maxSwipeDuration = 0.35f;
+        [Tooltip("Min travel for a swipe, as a fraction of screen height (so it's the same feel on any device).")]
+        [Range(0.02f, 0.5f)] [SerializeField] private float minSwipeScreenFraction = 0.12f;
+
         private const int NoFinger = -2;
 
         private Vector2 _delta;               // accumulated this frame
@@ -36,6 +42,9 @@ namespace OrbitalCargo.FirstPerson
 
         /// <summary>Raised on a quick tap; argument is the screen position of the tap.</summary>
         public event Action<Vector2> Tapped;
+
+        /// <summary>Raised on a quick flick; argument is the press→release delta in pixels (junk throw).</summary>
+        public event Action<Vector2> Swiped;
 
         /// <summary>Drag delta accumulated this frame, scaled by sensitivity. x = yaw, y = pitch.</summary>
         public Vector2 Delta => _delta * sensitivity;
@@ -64,9 +73,14 @@ namespace OrbitalCargo.FirstPerson
             if (eventData.pointerId != _activeFinger) return;
             _activeFinger = NoFinger;
 
-            bool quick = Time.unscaledTime - _downTime <= maxTapDuration;
-            bool still = Vector2.Distance(eventData.position, _downPos) <= maxTapMove;
-            if (quick && still) Tapped?.Invoke(eventData.position);
+            float duration = Time.unscaledTime - _downTime;
+            Vector2 delta = eventData.position - _downPos;
+            bool quick = duration <= maxTapDuration;
+            bool still = delta.magnitude <= maxTapMove;
+            if (quick && still)
+                Tapped?.Invoke(eventData.position);
+            else if (duration <= maxSwipeDuration && delta.magnitude >= Screen.height * minSwipeScreenFraction)
+                Swiped?.Invoke(delta);
         }
 
         // ── Lifecycle ──────────────────────────────────────────────────────────

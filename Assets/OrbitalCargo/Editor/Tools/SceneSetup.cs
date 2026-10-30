@@ -8,6 +8,7 @@ using OrbitalCargo.FirstPerson.EditorTools;
 using OrbitalCargo.Interaction;
 using OrbitalCargo.Juice;
 using OrbitalCargo.Room.EditorTools;
+using OrbitalCargo.Stations;
 using OrbitalCargo.Stations.EditorTools;
 using OrbitalCargo.UI;
 using OrbitalCargo.UI.EditorTools;
@@ -71,34 +72,39 @@ namespace OrbitalCargo.Shift.EditorTools
             PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(HudBuilder.HudPrefabPath));
             PlayerRigBuilder.CreateEventSystem();
 
-            WireControls(player, controls);
-            BuildSystems(player);
-            PlaceTempCrates(layout);
+            WireControls(player, controls, room.transform);
+            BuildSystems(player, room.transform);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
-            Debug.Log("[SceneSetup] Game.unity regenerated (room + stations, player, controls, event system, test crates).");
+            Debug.Log("[SceneSetup] Game.unity regenerated (room + stations, player, controls, HUD, systems).");
         }
 
         // ── Wiring ─────────────────────────────────────────────────────────────
 
         // The Player and Controls prefabs are independent, so their links live on the scene instances.
-        private static void WireControls(GameObject player, GameObject controls)
+        private static void WireControls(GameObject player, GameObject controls, Transform room)
         {
+            var lookArea = controls.GetComponentInChildren<TouchLookArea>(true);
             var input = new SerializedObject(player.GetComponent<MobileMoveInputProvider>());
             input.FindProperty("joystick").objectReferenceValue = controls.GetComponentInChildren<VirtualJoystick>(true);
-            input.FindProperty("lookArea").objectReferenceValue = controls.GetComponentInChildren<TouchLookArea>(true);
+            input.FindProperty("lookArea").objectReferenceValue = lookArea;
             input.ApplyModifiedPropertiesWithoutUndo();
 
             var ctx = new SerializedObject(controls.GetComponentInChildren<ContextButtonView>(true));
             ctx.FindProperty("interactor").objectReferenceValue = player.GetComponent<CrateInteractor>();
             ctx.FindProperty("input").objectReferenceValue = player.GetComponent<InteractionInputProvider>();
             ctx.ApplyModifiedPropertiesWithoutUndo();
+
+            var thrower = new SerializedObject(player.GetComponent<JunkThrower>());
+            thrower.FindProperty("lookArea").objectReferenceValue = lookArea;
+            thrower.FindProperty("chute").objectReferenceValue = room.GetComponentInChildren<Chute>(true);
+            thrower.ApplyModifiedPropertiesWithoutUndo();
         }
 
         // Scene-level services: the bootstrap (sound + pools) and the juice presenter (events → feedback).
-        private static void BuildSystems(GameObject player)
+        private static void BuildSystems(GameObject player, Transform room)
         {
             var systems = new GameObject(SystemsName);
 
@@ -122,8 +128,22 @@ namespace OrbitalCargo.Shift.EditorTools
             jso.FindProperty("onCratePicked").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CratePicked");
             jso.FindProperty("onCratePlaced").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CratePlaced");
             jso.FindProperty("onShuttleLaunched").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
+            jso.FindProperty("onCryoExpired").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CryoExpired");
+            jso.FindProperty("onCrateThrown").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateThrown");
+            jso.FindProperty("onCrateChuted").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateChuted");
             jso.FindProperty("launchShake").objectReferenceValue = CoreAssetFactory.Load<CameraShakeProfileSO>(CoreAssetFactory.LaunchShakePath);
             jso.ApplyModifiedPropertiesWithoutUndo();
+
+            // Editor test aid: 1-4 drop a standard / cryo / junk / volatile crate on the belt.
+            var keys = systems.AddComponent<SpawnDebugKeys>();
+            var kso = new SerializedObject(keys);
+            kso.FindProperty("spawner").objectReferenceValue = room.GetComponentInChildren<CrateSpawner>(true);
+            string[] keyTypes = { "CT_Standard", "CT_Cryo", "CT_Junk", "CT_Volatile" };
+            var keyTypesProp = kso.FindProperty("crateTypes");
+            keyTypesProp.arraySize = keyTypes.Length;
+            for (int i = 0; i < keyTypes.Length; i++)
+                keyTypesProp.GetArrayElementAtIndex(i).objectReferenceValue = CrateAssetFactory.LoadType(keyTypes[i]);
+            kso.ApplyModifiedPropertiesWithoutUndo();
 
             // Editor test aid: F fills the aimed-at bay.
             var filler = systems.AddComponent<Stations.BayDebugFiller>();
@@ -136,33 +156,6 @@ namespace OrbitalCargo.Shift.EditorTools
             for (int i = 0; i < types.Length; i++)
                 typesProp.GetArrayElementAtIndex(i).objectReferenceValue = CrateAssetFactory.LoadType(types[i]);
             fso.ApplyModifiedPropertiesWithoutUndo();
-        }
-
-        // Slice 2 stand-in for the spawner: a standard, a cryo and a volatile crate resting on the belt.
-        private static void PlaceTempCrates(Config.RoomLayoutSO layout)
-        {
-            if (layout.ConveyorWaypoints.Length < 2) return;
-
-            var root = new GameObject(TempCratesName).transform;
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(CrateAssetFactory.CratePrefabPath);
-            Vector3 a = layout.ConveyorWaypoints[0];
-            Vector3 b = layout.ConveyorWaypoints[layout.ConveyorWaypoints.Length - 1];
-            Quaternion facing = Quaternion.LookRotation(new Vector3(b.x - a.x, 0f, b.z - a.z).normalized, Vector3.up);
-
-            string[] types = { "CT_Standard", "CT_Cryo", "CT_Volatile" };
-            float[] along = { 0.55f, 0.72f, 0.89f };
-            for (int i = 0; i < types.Length; i++)
-            {
-                var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, root);
-                go.name = $"Crate_{types[i]}";
-                go.transform.SetPositionAndRotation(Vector3.Lerp(a, b, along[i]), facing);
-
-                var type = CrateAssetFactory.LoadType(types[i]);
-                var so = new SerializedObject(go.GetComponent<Crate>());
-                so.FindProperty("type").objectReferenceValue = type;
-                so.ApplyModifiedPropertiesWithoutUndo();
-                go.GetComponent<CrateVisuals>().Apply(type); // so the editor view matches play mode
-            }
         }
 
         private static void DestroyIfPresent(string name)

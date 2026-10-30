@@ -39,6 +39,75 @@ namespace OrbitalCargo.Stations.EditorTools
                 }
                 WireBay(anchor, bayTransform, layout.SlotsPerBay, config, onPlaced, ghostMaterial);
             }
+
+            WireConveyor(room);
+            WireChute(layout, room, config);
+        }
+
+        // Slice 4: belt + spawner on the Conveyor root, fed by the crate pool and the pitch schedule.
+        private static void WireConveyor(Transform room)
+        {
+            var root = room.Find("Conveyor");
+            if (root == null)
+            {
+                Debug.LogWarning("[StationWiring] Conveyor not found.");
+                return;
+            }
+
+            var waypoints = new System.Collections.Generic.List<Transform>();
+            for (int i = 0; ; i++)
+            {
+                var wp = root.Find($"Waypoint_{i}");
+                if (wp == null) break;
+                waypoints.Add(wp);
+            }
+
+            var shiftConfig = CoreAssetFactory.Load<ShiftConfigSO>(CoreAssetFactory.ShiftConfigPath);
+            var conveyor = root.gameObject.AddComponent<Conveyor>();
+            var cso = new SerializedObject(conveyor);
+            var wpProp = cso.FindProperty("waypoints");
+            wpProp.arraySize = waypoints.Count;
+            for (int i = 0; i < waypoints.Count; i++) wpProp.GetArrayElementAtIndex(i).objectReferenceValue = waypoints[i];
+            cso.FindProperty("config").objectReferenceValue = shiftConfig;
+            cso.ApplyModifiedPropertiesWithoutUndo();
+
+            var spawner = root.gameObject.AddComponent<CrateSpawner>();
+            var sso = new SerializedObject(spawner);
+            sso.FindProperty("conveyor").objectReferenceValue = conveyor;
+            sso.FindProperty("cratePooler").objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(CoreAssetFactory.CratePoolerPath);
+            sso.FindProperty("config").objectReferenceValue = shiftConfig;
+            sso.FindProperty("onCrateSpawned").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateSpawned");
+            sso.FindProperty("onRadioBeat").objectReferenceValue = CoreAssetFactory.LoadEvent<GameKit.Architecture.Events.GameEventWithString>("e_RadioBeat");
+            sso.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // Slice 4: the chute swallows thrown crates (trigger on the root) and offers "Drop" (solid hole plate).
+        private static void WireChute(RoomLayoutSO layout, Transform room, InteractionConfigSO config)
+        {
+            var root = room.Find("Chute");
+            if (root == null)
+            {
+                Debug.LogWarning("[StationWiring] Chute not found.");
+                return;
+            }
+
+            float dia = layout.ChuteRadius * 2f;
+            var trigger = root.gameObject.AddComponent<BoxCollider>();
+            trigger.isTrigger = true;
+            trigger.size = new Vector3(dia, 1.4f, dia);
+            trigger.center = new Vector3(0f, 0.7f, 0f);
+
+            var hole = root.Find("Hole");
+            if (hole != null) hole.gameObject.AddComponent<BoxCollider>(); // thin plate the centre ray can hit
+
+            var chute = root.gameObject.AddComponent<Chute>();
+            var so = new SerializedObject(chute);
+            so.FindProperty("targetPoint").objectReferenceValue = root.Find("TargetPoint");
+            so.FindProperty("config").objectReferenceValue = config;
+            so.FindProperty("credits").objectReferenceValue = CoreAssetFactory.Load<CreditsService>(CoreAssetFactory.CreditsServicePath);
+            so.FindProperty("cratePooler").objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(CoreAssetFactory.CratePoolerPath);
+            so.FindProperty("onCrateChuted").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateChuted");
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void WireBay(RoomLayoutSO.BayAnchor anchor, Transform bayTransform, int slotCount,

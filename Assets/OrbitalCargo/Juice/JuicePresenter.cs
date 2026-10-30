@@ -32,6 +32,9 @@ namespace OrbitalCargo.Juice
         [SerializeField] private GameEventWithCrate onCratePicked;
         [SerializeField] private GameEventWithCrate onCratePlaced;
         [SerializeField] private GameEventWithLaunchResult onShuttleLaunched;
+        [SerializeField] private GameEventWithCrate onCryoExpired;
+        [SerializeField] private GameEventWithCrate onCrateThrown;
+        [SerializeField] private GameEventWithCrate onCrateChuted;
 
         [Header("Feel")]
         [SerializeField] private CameraShakeProfileSO launchShake;
@@ -48,6 +51,9 @@ namespace OrbitalCargo.Juice
             if (onCratePicked != null) onCratePicked.Subscribe(HandleCratePicked);
             if (onCratePlaced != null) onCratePlaced.Subscribe(HandleCratePlaced);
             if (onShuttleLaunched != null) onShuttleLaunched.Subscribe(HandleShuttleLaunched);
+            if (onCryoExpired != null) onCryoExpired.Subscribe(HandleCryoExpired);
+            if (onCrateThrown != null) onCrateThrown.Subscribe(HandleCrateThrown);
+            if (onCrateChuted != null) onCrateChuted.Subscribe(HandleCrateChuted);
         }
 
         private void OnDisable()
@@ -55,6 +61,9 @@ namespace OrbitalCargo.Juice
             if (onCratePicked != null) onCratePicked.UnSubscribe(HandleCratePicked);
             if (onCratePlaced != null) onCratePlaced.UnSubscribe(HandleCratePlaced);
             if (onShuttleLaunched != null) onShuttleLaunched.UnSubscribe(HandleShuttleLaunched);
+            if (onCryoExpired != null) onCryoExpired.UnSubscribe(HandleCryoExpired);
+            if (onCrateThrown != null) onCrateThrown.UnSubscribe(HandleCrateThrown);
+            if (onCrateChuted != null) onCrateChuted.UnSubscribe(HandleCrateChuted);
         }
 
         // ── Handlers ───────────────────────────────────────────────────────────
@@ -69,6 +78,22 @@ namespace OrbitalCargo.Juice
         private void HandleCratePlaced(Crate crate)
         {
             if (sound != null) sound.Play("Place");
+            if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Medium);
+        }
+
+        private void HandleCryoExpired(Crate crate)
+        {
+            if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Failure);
+        }
+
+        private void HandleCrateThrown(Crate crate)
+        {
+            if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Light);
+        }
+
+        private void HandleCrateChuted(Crate crate)
+        {
+            if (sound != null) sound.Play("CoinsCollect");
             if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Medium);
         }
 

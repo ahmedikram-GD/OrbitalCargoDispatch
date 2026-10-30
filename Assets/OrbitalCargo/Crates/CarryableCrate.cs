@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 namespace OrbitalCargo.Crates
@@ -15,9 +16,17 @@ namespace OrbitalCargo.Crates
     [AddComponentMenu("OrbitalCargo/Crates/Carryable Crate")]
     public sealed class CarryableCrate : MonoBehaviour
     {
+        // Thrown-crate settling: give it a moment to leave the hand, then wait until it's (nearly) still.
+        private const float SettleGrace = 0.4f;
+        private const float SettleTimeout = 4f;
+        private const float SettledSpeedSqr = 0.01f;
+        private const float ThrowSpin = 4f;
+        private const float GrowBackDuration = 0.25f;
+
         private Rigidbody _body;
         private Collider[] _colliders;
         private Coroutine _move;
+        private Coroutine _settle;
         private Vector3 _baseScale;
 
         // The in-flight move's destination, so CompleteMove can land it instantly.
@@ -40,7 +49,11 @@ namespace OrbitalCargo.Crates
             _baseScale = transform.localScale;
         }
 
-        private void OnDisable() => StopMove();
+        private void OnDisable()
+        {
+            StopMove();
+            Freeze();
+        }
 
         // ── Public API ─────────────────────────────────────────────────────────
 
@@ -85,6 +98,8 @@ namespace OrbitalCargo.Crates
         public void PlaceImmediate(Transform anchor)
         {
             StopMove();
+            Freeze();
+            DOTween.Kill(transform);
             transform.SetParent(anchor, false);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
@@ -92,11 +107,67 @@ namespace OrbitalCargo.Crates
             SetCollidersEnabled(true);
         }
 
+        /// <summary>
+        /// The one physics moment (junk throw): unparent, grow back to full size, and fly with real
+        /// gravity at <paramref name="velocity"/>. Once it lands and settles it turns kinematic again and
+        /// <paramref name="onSettled"/> runs (the thrower makes a missed throw pickable).
+        /// </summary>
+        public void Launch(Vector3 velocity, Action onSettled = null)
+        {
+            StopMove();
+            StopSettle();
+            transform.SetParent(null, true);
+            transform.DOScale(_baseScale, GrowBackDuration).SetLink(gameObject);
+            SetCollidersEnabled(true);
+
+            _body.isKinematic = false;
+            _body.useGravity = true;
+            _body.linearVelocity = velocity;
+            _body.angularVelocity = UnityEngine.Random.insideUnitSphere * ThrowSpin;
+            _settle = StartCoroutine(SettleRoutine(onSettled));
+        }
+
+        /// <summary>Stop any physics flight and go kinematic in place (caught by the chute, pooled).</summary>
+        public void Freeze()
+        {
+            StopSettle();
+            if (_body == null) return;
+            if (!_body.isKinematic)
+            {
+                _body.linearVelocity = Vector3.zero;
+                _body.angularVelocity = Vector3.zero;
+            }
+            _body.isKinematic = true;
+            _body.useGravity = false;
+        }
+
         // ── Helpers ────────────────────────────────────────────────────────────
+
+        private IEnumerator SettleRoutine(Action onSettled)
+        {
+            yield return new WaitForSeconds(SettleGrace);
+            for (float t = 0f; t < SettleTimeout; t += Time.deltaTime)
+            {
+                if (_body.linearVelocity.sqrMagnitude < SettledSpeedSqr) break;
+                yield return null;
+            }
+            _settle = null;
+            Freeze();
+            onSettled?.Invoke();
+        }
+
+        private void StopSettle()
+        {
+            if (_settle == null) return;
+            StopCoroutine(_settle);
+            _settle = null;
+        }
 
         private void StartMove(Transform holder, Vector3 localOffset, Vector3 targetScale, float duration, float arcHeight, Action onDone)
         {
             StopMove();
+            StopSettle();
+            DOTween.Kill(transform); // e.g. a thrown crate's grow-back
             transform.SetParent(null, true);
             _moveHolder = holder;
             _moveOffset = localOffset;

@@ -214,6 +214,7 @@ GameObject:
   - component: {fileID: 5125391348693107681}
   - component: {fileID: 4238872176929303376}
   - component: {fileID: 2099836788763279265}
+  - component: {fileID: 5716149042811371104}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -360,3 +361,21 @@ MonoBehaviour:
   aim: {fileID: 1087717942269175039}
   carrier: {fileID: 4238872176929303376}
   onCratePicked: {fileID: 11400000, guid: 1eb394651a48a144c9e90e29ecc55016, type: 2}
+--- !u!114 &5716149042811371104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8823348177385490186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07da7caba7d850f45a21c5614ec3ea8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Interaction.JunkThrower
+  carrier: {fileID: 4238872176929303376}
+  config: {fileID: 11400000, guid: 9dff68b6164500247acb2544d9474686, type: 2}
+  aim: {fileID: 1087717942269175039}
+  lookArea: {fileID: 0}
+  chute: {fileID: 0}
+  onCrateThrown: {fileID: 11400000, guid: 93405952222e3164d8ad7cec7fb54695, type: 2}
