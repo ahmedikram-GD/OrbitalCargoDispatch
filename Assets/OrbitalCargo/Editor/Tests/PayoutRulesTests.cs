@@ -86,6 +86,60 @@ namespace OrbitalCargo.Tests
         }
 
         [Test]
+        public void Launch_BadCargo_NamesFirstBadItem()
+        {
+            var egg = ScriptableObject.CreateInstance<HiddenItemSO>();
+            var bad = Crate(10, BayId.A, bad: true);
+            bad.Hidden = egg;
+
+            LaunchResult r = PayoutRules.Launch(new List<CrateSnapshot> { Crate(10, BayId.A), bad }, BayId.A, _cfg);
+
+            Assert.AreSame(egg, r.FirstBadItem);
+            Object.DestroyImmediate(egg);
+        }
+
+        [Test]
+        public void Chute_Junk_PaysItsPayout()
+        {
+            var junk = Crate(5, BayId.Chute);
+            junk.IsJunk = true;
+
+            ChuteResult r = PayoutRules.Chute(junk, _cfg);
+
+            Assert.AreEqual(5, r.Credits);
+            Assert.IsFalse(r.Collected);
+        }
+
+        [Test]
+        public void Chute_ScannedBad_PaysBonus_AndCollects()
+        {
+            _cfg.ChuteBonus = 25;
+
+            ChuteResult r = PayoutRules.Chute(Crate(10, BayId.A, bad: true, scanned: true), _cfg);
+
+            Assert.AreEqual(25, r.Credits);
+            Assert.IsTrue(r.Collected);
+        }
+
+        [Test]
+        public void Chute_UnscannedBad_NoBonus_NotCollected()
+        {
+            ChuteResult r = PayoutRules.Chute(Crate(10, BayId.A, bad: true, scanned: false), _cfg);
+
+            Assert.AreEqual(0, r.Credits);
+            Assert.IsFalse(r.Collected);
+        }
+
+        [Test]
+        public void Chute_CleanCrate_IsLost()
+        {
+            ChuteResult r = PayoutRules.Chute(Crate(10, BayId.A, scanned: true), _cfg);
+
+            Assert.AreEqual(0, r.Credits);
+            Assert.IsFalse(r.Collected);
+        }
+
+        [Test]
         public void Launch_ScannedClean_NoFine()
         {
             var crates = new List<CrateSnapshot> { Crate(10, BayId.A, bad: false, scanned: true), Crate(10, BayId.A) };

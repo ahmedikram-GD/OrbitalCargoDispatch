@@ -11,6 +11,17 @@ namespace OrbitalCargo.Economy
         public bool CryoExpired;
         public bool IsBad;
         public bool IsScanned;
+        public bool IsJunk;
+        /// <summary>What a bad crate hides (null when clean) — names the news headline.</summary>
+        public HiddenItemSO Hidden;
+    }
+
+    /// <summary>What chuting one crate earns.</summary>
+    public struct ChuteResult
+    {
+        public int Credits;
+        /// <summary>True when a scanned contraband item goes into the collection.</summary>
+        public bool Collected;
     }
 
     /// <summary>What one shuttle launch earned. Carried by <c>e_ShuttleLaunched</c> to juice, HUD and stats.</summary>
@@ -21,6 +32,8 @@ namespace OrbitalCargo.Economy
         /// <summary>Fine owed for shipping bad cargo (0 if none). Applied by the news alert, not here.</summary>
         public int FineApplied;
         public int BadShipped;
+        /// <summary>The first bad item aboard (null if none) — the news alert's headline.</summary>
+        public HiddenItemSO FirstBadItem;
         public int CrateCount;
         public int WrongBayCount;
         public BayId Bay;

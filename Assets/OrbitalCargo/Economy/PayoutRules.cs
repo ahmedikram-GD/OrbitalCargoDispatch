@@ -26,11 +26,26 @@ namespace OrbitalCargo.Economy
                 CrateSnapshot c = crates[i];
                 bool wrongBay = c.Destination != bay;
                 if (wrongBay) result.WrongBayCount++;
-                if (c.IsBad) result.BadShipped++;
+                if (c.IsBad)
+                {
+                    result.BadShipped++;
+                    if (result.FirstBadItem == null) result.FirstBadItem = c.Hidden;
+                }
                 result.Credits += CratePayout(c.BasePayout, c.CryoExpired, wrongBay, cfg);
             }
             if (result.BadShipped > 0) result.FineApplied = cfg.UnscannedBadFine;
             return result;
+        }
+
+        /// <summary>
+        /// Chuting a crate: junk pays its payout; a crate the scanner showed was bad pays the chute bonus
+        /// and goes into the collection; anything else is simply lost (GDD: chute a clean crate → lose its value).
+        /// </summary>
+        public static ChuteResult Chute(CrateSnapshot crate, ShiftConfigSO cfg)
+        {
+            if (crate.IsBad && crate.IsScanned) return new ChuteResult { Credits = cfg.ChuteBonus, Collected = true };
+            if (crate.IsJunk) return new ChuteResult { Credits = crate.BasePayout };
+            return default;
         }
     }
 }
