@@ -33,6 +33,7 @@ namespace OrbitalCargo.Shift.EditorTools
 
         public const string ShiftConfigPath = ConfigFolder + "/ShiftConfig_Pitch.asset";
         public const string CreditsPath = VariablesFolder + "/vDBInt_Credits.asset";
+        public const string ItemsCollectedPath = VariablesFolder + "/vDBInt_ItemsCollected.asset";
         public const string CreditsServicePath = ServicesFolder + "/CreditsService.asset";
         public const string SoundsPath = "Assets/OrbitalCargo/Audio/OcdSounds.asset";
         public const string LaunchShakePath = ConfigFolder + "/Shake_Launch.asset";
@@ -55,6 +56,8 @@ namespace OrbitalCargo.Shift.EditorTools
             EnsureEvent<GameEvent>("e_CreditsChanged");
             EnsureEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
             EnsureEvent<GameEventWithString>("e_RadioBeat");
+            EnsureEvent<GameEventWithString>("e_NewsAlert");
+            EnsurePersistentInt(ItemsCollectedPath, "OCD_ItemsCollected");
             EnsureSchedules();
             EnsureCreditsService();
             EnsureLaunchShake();
@@ -82,12 +85,14 @@ namespace OrbitalCargo.Shift.EditorTools
 
         private static T EnsureEvent<T>(string fileName) where T : ScriptableObject => EnsureAsset<T>($"{EventsFolder}/{fileName}.asset");
 
-        private static void EnsureCredits()
+        private static void EnsureCredits() => EnsurePersistentInt(CreditsPath, "OCD_Credits");
+
+        private static void EnsurePersistentInt(string path, string key)
         {
-            if (Load<DBInt>(CreditsPath) != null) return;
-            var credits = EnsureAsset<DBInt>(CreditsPath);
-            var so = new SerializedObject(credits);
-            so.FindProperty("key").stringValue = "OCD_Credits";
+            if (Load<DBInt>(path) != null) return;
+            var variable = EnsureAsset<DBInt>(path);
+            var so = new SerializedObject(variable);
+            so.FindProperty("key").stringValue = key;
             so.FindProperty("DefaultValue").intValue = 0;
             so.ApplyModifiedPropertiesWithoutUndo();
         }

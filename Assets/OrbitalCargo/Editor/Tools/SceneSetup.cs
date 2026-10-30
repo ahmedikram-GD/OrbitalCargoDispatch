@@ -131,6 +131,10 @@ namespace OrbitalCargo.Shift.EditorTools
             jso.FindProperty("onCryoExpired").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CryoExpired");
             jso.FindProperty("onCrateThrown").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateThrown");
             jso.FindProperty("onCrateChuted").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateChuted");
+            jso.FindProperty("onScanStarted").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_ScanStarted");
+            jso.FindProperty("onScanResult").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_ScanResult");
+            jso.FindProperty("onItemCollected").objectReferenceValue = CrateAssetFactory.EnsureHiddenItemEvent("e_ItemCollected");
+            jso.FindProperty("onNewsAlert").objectReferenceValue = CoreAssetFactory.LoadEvent<GameKit.Architecture.Events.GameEventWithString>("e_NewsAlert");
             jso.FindProperty("launchShake").objectReferenceValue = CoreAssetFactory.Load<CameraShakeProfileSO>(CoreAssetFactory.LaunchShakePath);
             jso.ApplyModifiedPropertiesWithoutUndo();
 
@@ -143,7 +147,17 @@ namespace OrbitalCargo.Shift.EditorTools
             keyTypesProp.arraySize = keyTypes.Length;
             for (int i = 0; i < keyTypes.Length; i++)
                 keyTypesProp.GetArrayElementAtIndex(i).objectReferenceValue = CrateAssetFactory.LoadType(keyTypes[i]);
+            kso.FindProperty("suspiciousItem").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Config.HiddenItemSO>(CrateAssetFactory.AlienEggPath);
             kso.ApplyModifiedPropertiesWithoutUndo();
+
+            // Contraband consequence: fine + news ticker after a launch that shipped bad cargo.
+            var news = systems.AddComponent<NewsDesk>();
+            var nso = new SerializedObject(news);
+            nso.FindProperty("onShuttleLaunched").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
+            nso.FindProperty("onNewsAlert").objectReferenceValue = CoreAssetFactory.LoadEvent<GameKit.Architecture.Events.GameEventWithString>("e_NewsAlert");
+            nso.FindProperty("credits").objectReferenceValue = CoreAssetFactory.Load<CreditsService>(CoreAssetFactory.CreditsServicePath);
+            nso.FindProperty("config").objectReferenceValue = CoreAssetFactory.Load<Config.ShiftConfigSO>(CoreAssetFactory.ShiftConfigPath);
+            nso.ApplyModifiedPropertiesWithoutUndo();
 
             // Editor test aid: F fills the aimed-at bay.
             var filler = systems.AddComponent<Stations.BayDebugFiller>();

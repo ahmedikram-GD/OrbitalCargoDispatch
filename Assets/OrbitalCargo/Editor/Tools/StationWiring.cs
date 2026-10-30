@@ -42,6 +42,30 @@ namespace OrbitalCargo.Stations.EditorTools
 
             WireConveyor(room);
             WireChute(layout, room, config);
+            WireBooth(room, config);
+        }
+
+        // Slice 5: the scanner booth reveal.
+        private static void WireBooth(Transform room, InteractionConfigSO interaction)
+        {
+            var root = room.Find("ScannerBooth");
+            if (root == null)
+            {
+                Debug.LogWarning("[StationWiring] ScannerBooth not found.");
+                return;
+            }
+
+            var booth = root.gameObject.AddComponent<ScannerBooth>();
+            var so = new SerializedObject(booth);
+            so.FindProperty("cratePoint").objectReferenceValue = root.Find("CratePoint");
+            so.FindProperty("scanLine").objectReferenceValue = root.Find("ScanLine");
+            so.FindProperty("statusLight").objectReferenceValue = root.Find("StatusLight")?.GetComponent<Renderer>();
+            so.FindProperty("xrayMaterial").objectReferenceValue = GreyboxMaterials.GetTransparent("XRayCasing", new Color(0.4f, 0.9f, 1f, 0.22f));
+            so.FindProperty("config").objectReferenceValue = CoreAssetFactory.Load<ShiftConfigSO>(CoreAssetFactory.ShiftConfigPath);
+            so.FindProperty("interaction").objectReferenceValue = interaction;
+            so.FindProperty("onScanStarted").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_ScanStarted");
+            so.FindProperty("onScanResult").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_ScanResult");
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         // Slice 4: belt + spawner on the Conveyor root, fed by the crate pool and the pitch schedule.
@@ -103,10 +127,13 @@ namespace OrbitalCargo.Stations.EditorTools
             var chute = root.gameObject.AddComponent<Chute>();
             var so = new SerializedObject(chute);
             so.FindProperty("targetPoint").objectReferenceValue = root.Find("TargetPoint");
-            so.FindProperty("config").objectReferenceValue = config;
+            so.FindProperty("interaction").objectReferenceValue = config;
+            so.FindProperty("config").objectReferenceValue = CoreAssetFactory.Load<ShiftConfigSO>(CoreAssetFactory.ShiftConfigPath);
             so.FindProperty("credits").objectReferenceValue = CoreAssetFactory.Load<CreditsService>(CoreAssetFactory.CreditsServicePath);
             so.FindProperty("cratePooler").objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(CoreAssetFactory.CratePoolerPath);
             so.FindProperty("onCrateChuted").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateChuted");
+            so.FindProperty("itemsCollected").objectReferenceValue = CoreAssetFactory.Load<GameKit.Architecture.Variables.DBInt>(CoreAssetFactory.ItemsCollectedPath);
+            so.FindProperty("onItemCollected").objectReferenceValue = CrateAssetFactory.EnsureHiddenItemEvent("e_ItemCollected");
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 

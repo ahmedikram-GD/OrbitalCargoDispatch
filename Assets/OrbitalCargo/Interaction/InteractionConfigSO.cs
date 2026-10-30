@@ -39,6 +39,7 @@ namespace OrbitalCargo.Interaction
         public string HandsFullPrompt = "Hands full";
         public string LaunchPrompt = "Launch";
         public string DropPrompt = "Drop";
+        public string ScanPrompt = "Scan";
 
         [Header("Junk throw")]
         [Tooltip("The throw is guided into the chute when it's within this distance (m)...")]

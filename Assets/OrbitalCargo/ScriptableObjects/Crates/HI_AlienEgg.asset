@@ -14,4 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Config.HiddenItemSO
   Id: alien_egg
   DisplayName: Alien Egg
-  Prefab: {fileID: 0}
+  Prefab: {fileID: 1081860645376676635, guid: 6e94c8b0e6d88a54fb729530465c3606, type: 3}
+  Icon: {fileID: 0}
+  IconTint: {r: 0.4, g: 1, b: 0.3, a: 1}
+  CollectionSet: Alien Wildlife
+  NewsHeadline: Alien egg hatches on colony!

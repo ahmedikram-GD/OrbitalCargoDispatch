@@ -185,6 +185,14 @@ namespace OrbitalCargo.Room.EditorTools
             var cratePoint = new GameObject("CratePoint").transform;
             cratePoint.SetParent(booth, false);
             cratePoint.localPosition = new Vector3(0f, 0.6f, 0f);
+
+            // Scan line (swept top → bottom by the ScannerBooth) and the result lamp on the roof front.
+            var line = Box("ScanLine", booth, new Vector3(0f, 1.5f, 0f), new Vector3(1.22f, 0.03f, 1.22f),
+                           GreyboxMaterials.Get("ScanLine", new Color(0.3f, 1f, 1f), emission: 3f), local: true, collider: false);
+            line.gameObject.isStatic = false;
+            line.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            Box("StatusLight", booth, new Vector3(0f, 2.97f, 0.62f), new Vector3(0.6f, 0.14f, 0.2f),
+                GreyboxMaterials.Get("StatusLight", new Color(0.2f, 0.6f, 1f), emission: 0.6f), local: true, collider: false);
         }
 
         private static void BuildChute(RoomLayoutSO layout, Transform root)

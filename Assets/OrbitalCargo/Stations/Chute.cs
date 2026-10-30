@@ -1,5 +1,7 @@
 using DG.Tweening;
 using GameKit.Architecture.PoolSystem;
+using GameKit.Architecture.Variables;
+using OrbitalCargo.Config;
 using OrbitalCargo.Crates;
 using OrbitalCargo.Economy;
 using OrbitalCargo.Interaction;
@@ -9,8 +11,9 @@ namespace OrbitalCargo.Stations
 {
     /// <summary>
     /// The round floor hatch. Swallows thrown crates that fall into its trigger, and offers "Drop" for
-    /// whatever is in the player's hands. Junk pays its payout; a clean, non-junk crate is simply lost
-    /// (GDD: "chute a clean crate → lose its value"). Slice 5 adds the scanned-contraband bonus.
+    /// whatever is in the player's hands. Payout per <see cref="PayoutRules.Chute"/>: junk pays its
+    /// payout, scanned contraband pays the chute bonus and is logged to the collection, and anything
+    /// else is simply lost (GDD: "chute a clean crate → lose its value").
     /// </summary>
     [AddComponentMenu("OrbitalCargo/Stations/Chute")]
     public sealed class Chute : MonoBehaviour, IInteractable
@@ -20,11 +23,19 @@ namespace OrbitalCargo.Stations
         [Tooltip("Aim point for assisted throws (Chute/TargetPoint).")]
         [SerializeField] private Transform targetPoint;
         [Tooltip("FP_InteractionConfig — prompt text.")]
-        [SerializeField] private InteractionConfigSO config;
+        [SerializeField] private InteractionConfigSO interaction;
         [SerializeField] private CreditsService credits;
         [SerializeField] private PoolManagerSO cratePooler;
         [Tooltip("e_CrateChuted. Optional.")]
         [SerializeField] private GameEventWithCrate onCrateChuted;
+        [Tooltip("ShiftConfig_Pitch — chute bonus for scanned contraband.")]
+        [SerializeField] private ShiftConfigSO config;
+
+        [Header("Collection")]
+        [Tooltip("vDBInt_ItemsCollected — how many contraband items have been logged.")]
+        [SerializeField] private DBInt itemsCollected;
+        [Tooltip("e_ItemCollected. Raised when a scanned contraband item is chuted (pop-up, juice).")]
+        [SerializeField] private GameEventWithHiddenItem onItemCollected;
 
         [Header("Swallow")]
         [Tooltip("Seconds a crate takes to sink out of sight.")]
@@ -46,7 +57,7 @@ namespace OrbitalCargo.Stations
         // ── IInteractable ──────────────────────────────────────────────────────
 
         public string Prompt(CrateCarrier carrier) =>
-            carrier != null && carrier.HasCrate && config != null ? config.DropPrompt : string.Empty;
+            carrier != null && carrier.HasCrate && interaction != null ? interaction.DropPrompt : string.Empty;
 
         public bool CanInteract(CrateCarrier carrier) => carrier != null && carrier.HasCrate;
 
@@ -64,7 +75,22 @@ namespace OrbitalCargo.Stations
             crate.Carryable.Freeze();
             crate.SetState(CrateState.Consumed);
 
-            if (crate.Type != null && crate.Type.IsJunk && credits != null) credits.Add(crate.Type.Payout);
+            ChuteResult result = config != null
+                ? PayoutRules.Chute(new CrateSnapshot
+                  {
+                      BasePayout = crate.Type != null ? crate.Type.Payout : 0,
+                      IsJunk = crate.Type != null && crate.Type.IsJunk,
+                      IsBad = crate.IsBad,
+                      IsScanned = crate.IsScanned,
+                      Hidden = crate.HiddenItem,
+                  }, config)
+                : default;
+            if (result.Credits > 0 && credits != null) credits.Add(result.Credits);
+            if (result.Collected)
+            {
+                if (itemsCollected != null) itemsCollected.Increment(1);
+                if (onItemCollected != null) onItemCollected.Raise(crate.HiddenItem);
+            }
             if (onCrateChuted != null) onCrateChuted.Raise(crate);
 
             Transform t = crate.transform;

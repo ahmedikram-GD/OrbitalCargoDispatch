@@ -35,6 +35,10 @@ namespace OrbitalCargo.Juice
         [SerializeField] private GameEventWithCrate onCryoExpired;
         [SerializeField] private GameEventWithCrate onCrateThrown;
         [SerializeField] private GameEventWithCrate onCrateChuted;
+        [SerializeField] private GameEventWithCrate onScanStarted;
+        [SerializeField] private GameEventWithCrate onScanResult;
+        [SerializeField] private GameEventWithHiddenItem onItemCollected;
+        [SerializeField] private GameKit.Architecture.Events.GameEventWithString onNewsAlert;
 
         [Header("Feel")]
         [SerializeField] private CameraShakeProfileSO launchShake;
@@ -54,6 +58,10 @@ namespace OrbitalCargo.Juice
             if (onCryoExpired != null) onCryoExpired.Subscribe(HandleCryoExpired);
             if (onCrateThrown != null) onCrateThrown.Subscribe(HandleCrateThrown);
             if (onCrateChuted != null) onCrateChuted.Subscribe(HandleCrateChuted);
+            if (onScanStarted != null) onScanStarted.Subscribe(HandleScanStarted);
+            if (onScanResult != null) onScanResult.Subscribe(HandleScanResult);
+            if (onItemCollected != null) onItemCollected.Subscribe(HandleItemCollected);
+            if (onNewsAlert != null) onNewsAlert.Subscribe(HandleNewsAlert);
         }
 
         private void OnDisable()
@@ -64,6 +72,10 @@ namespace OrbitalCargo.Juice
             if (onCryoExpired != null) onCryoExpired.UnSubscribe(HandleCryoExpired);
             if (onCrateThrown != null) onCrateThrown.UnSubscribe(HandleCrateThrown);
             if (onCrateChuted != null) onCrateChuted.UnSubscribe(HandleCrateChuted);
+            if (onScanStarted != null) onScanStarted.UnSubscribe(HandleScanStarted);
+            if (onScanResult != null) onScanResult.UnSubscribe(HandleScanResult);
+            if (onItemCollected != null) onItemCollected.UnSubscribe(HandleItemCollected);
+            if (onNewsAlert != null) onNewsAlert.UnSubscribe(HandleNewsAlert);
         }
 
         // ── Handlers ───────────────────────────────────────────────────────────
@@ -95,6 +107,31 @@ namespace OrbitalCargo.Juice
         {
             if (sound != null) sound.Play("CoinsCollect");
             if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Medium);
+        }
+
+        private void HandleScanStarted(Crate crate)
+        {
+            if (sound != null) sound.Play("Click");
+            if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Selection);
+        }
+
+        private void HandleScanResult(Crate crate)
+        {
+            bool bad = crate != null && crate.IsBad;
+            if (sound != null) sound.Play(bad ? "ScanBad" : "ScanGood");
+            if (haptics != null) haptics.ApplyHapticFeedback(bad ? HapticIntensity.Failure : HapticIntensity.Success);
+            if (bad && shaker != null) shaker.Play(launchShake);
+        }
+
+        private void HandleItemCollected(Config.HiddenItemSO item)
+        {
+            if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Success);
+        }
+
+        private void HandleNewsAlert(string line)
+        {
+            if (sound != null) sound.Play("Alarm");
+            if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Failure);
         }
 
         private void HandleShuttleLaunched(LaunchResult result)

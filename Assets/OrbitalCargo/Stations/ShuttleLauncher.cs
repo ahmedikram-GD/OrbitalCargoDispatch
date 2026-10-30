@@ -69,6 +69,8 @@ namespace OrbitalCargo.Stations
                     CryoExpired = crate.CryoExpired,
                     IsBad = crate.IsBad,
                     IsScanned = crate.IsScanned,
+                    IsJunk = crate.Type != null && crate.Type.IsJunk,
+                    Hidden = crate.HiddenItem,
                 });
                 crate.Carryable.CompleteMove(); // a crate still snapping in must land before it boards
                 crate.SetState(CrateState.Consumed);

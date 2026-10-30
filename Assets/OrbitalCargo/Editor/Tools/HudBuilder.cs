@@ -99,6 +99,9 @@ namespace OrbitalCargo.UI.EditorTools
             Assign(collector, "soundService", sounds);
             Assign(collector, "hapticHandlerSo", haptics);
 
+            BuildCollectionPopup(root.transform, panelSprite, knob);
+            BuildNewsBanner(root.transform, panelSprite);
+
             var presenter = root.AddComponent<PayoutPopupPresenter>();
             Assign(presenter, "onShuttleLaunched", CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched"));
             Assign(presenter, "creditsChanged", creditsChanged);
@@ -112,6 +115,74 @@ namespace OrbitalCargo.UI.EditorTools
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, HudPrefabPath);
             Object.DestroyImmediate(root);
             return prefab;
+        }
+
+        // "Added to collection" card, upper centre, hidden until e_ItemCollected.
+        private static void BuildCollectionPopup(Transform root, Sprite panelSprite, Sprite knob)
+        {
+            var card = Rect("CollectionPopup", root, new Vector2(0.5f, 0.72f), new Vector2(0.5f, 0.72f), new Vector2(680f, 150f), Vector2.zero, new Vector2(0.5f, 0.5f));
+            var bg = card.gameObject.AddComponent<Image>();
+            bg.sprite = panelSprite;
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.06f, 0.12f, 0.08f, 0.92f);
+            bg.raycastTarget = false;
+            var group = card.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f;
+            group.blocksRaycasts = false;
+
+            var icon = Rect("Icon", card, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(96f, 96f), new Vector2(80f, 0f), new Vector2(0.5f, 0.5f));
+            var iconImage = icon.gameObject.AddComponent<Image>();
+            iconImage.sprite = knob;
+            iconImage.raycastTarget = false;
+
+            var title = Text("Title", card, new Vector2(150f, 10f), new Vector2(-20f, -10f), 42f, new Color(0.55f, 1f, 0.45f), TextAlignmentOptions.TopLeft);
+            title.text = "Added to collection";
+            var subtitle = Text("Subtitle", card, new Vector2(150f, 18f), new Vector2(-20f, -70f), 32f, Color.white, TextAlignmentOptions.BottomLeft);
+            subtitle.text = "Alien Egg";
+
+            var view = card.gameObject.AddComponent<CollectionPopupView>();
+            Assign(view, "onItemCollected", Crates.EditorTools.CrateAssetFactory.EnsureHiddenItemEvent("e_ItemCollected"));
+            Assign(view, "card", card);
+            Assign(view, "group", group);
+            Assign(view, "icon", iconImage);
+            Assign(view, "title", title);
+            Assign(view, "subtitle", subtitle);
+        }
+
+        // "BREAKING" news ticker, drops from the top edge on e_NewsAlert.
+        private static void BuildNewsBanner(Transform root, Sprite panelSprite)
+        {
+            var banner = Rect("NewsBanner", root, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(1500f, 110f), new Vector2(0f, 140f), new Vector2(0.5f, 0.5f));
+            var bg = banner.gameObject.AddComponent<Image>();
+            bg.sprite = panelSprite;
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.65f, 0.05f, 0.05f, 0.95f);
+            bg.raycastTarget = false;
+
+            var label = Text("Label", banner, new Vector2(30f, 0f), new Vector2(-30f, 0f), 40f, Color.white, TextAlignmentOptions.Center);
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 24f;
+            label.fontSizeMax = 40f;
+            label.text = "BREAKING";
+
+            var view = banner.gameObject.AddComponent<NewsAlertView>();
+            Assign(view, "onNewsAlert", CoreAssetFactory.LoadEvent<GameEventWithString>("e_NewsAlert"));
+            Assign(view, "banner", banner);
+            Assign(view, "label", label);
+        }
+
+        private static TextMeshProUGUI Text(string name, Transform parent, Vector2 offsetMin, Vector2 offsetMax, float size, Color color, TextAlignmentOptions align)
+        {
+            var rt = Rect(name, parent, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f));
+            rt.offsetMin = offsetMin;
+            rt.offsetMax = offsetMax;
+            var text = rt.gameObject.AddComponent<TextMeshProUGUI>();
+            text.fontSize = size;
+            text.fontStyle = FontStyles.Bold;
+            text.color = color;
+            text.alignment = align;
+            text.raycastTarget = false;
+            return text;
         }
 
         // ── Helpers ────────────────────────────────────────────────────────────

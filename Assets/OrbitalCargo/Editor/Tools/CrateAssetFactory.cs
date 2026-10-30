@@ -31,20 +31,56 @@ namespace OrbitalCargo.Crates.EditorTools
         {
             EnsureCrateTypes();
             EnsureHiddenItems();
-            foreach (var evt in new[] { "e_CratePicked", "e_CratePlaced", "e_CrateSpawned", "e_CryoExpired", "e_CrateThrown", "e_CrateChuted" })
+            foreach (var evt in new[] { "e_CratePicked", "e_CratePlaced", "e_CrateSpawned", "e_CryoExpired", "e_CrateThrown", "e_CrateChuted", "e_ScanStarted", "e_ScanResult" })
                 EnsureCrateEvent(evt);
+            EnsureHiddenItemEvent("e_ItemCollected");
             BuildCratePrefab();
             AssetDatabase.SaveAssets();
         }
 
+        private const string AlienEggPrefabPath = "Assets/OrbitalCargo/Prefabs/Crates/Hidden/AlienEgg.prefab";
+
         private static void EnsureHiddenItems()
         {
-            if (AssetDatabase.LoadAssetAtPath<HiddenItemSO>(AlienEggPath) != null) return;
-            Directory.CreateDirectory(CratesFolder);
-            var egg = ScriptableObject.CreateInstance<HiddenItemSO>();
-            egg.Id = "alien_egg";
-            egg.DisplayName = "Alien Egg";
-            AssetDatabase.CreateAsset(egg, AlienEggPath);
+            var egg = AssetDatabase.LoadAssetAtPath<HiddenItemSO>(AlienEggPath);
+            if (egg == null)
+            {
+                Directory.CreateDirectory(CratesFolder);
+                egg = ScriptableObject.CreateInstance<HiddenItemSO>();
+                egg.Id = "alien_egg";
+                egg.DisplayName = "Alien Egg";
+                AssetDatabase.CreateAsset(egg, AlienEggPath);
+            }
+            if (egg.Prefab == null)
+            {
+                egg.Prefab = BuildAlienEggPrefab();
+                EditorUtility.SetDirty(egg);
+            }
+        }
+
+        // Greybox egg: a glowing green ovoid that reads instantly through the X-ray casing.
+        private static GameObject BuildAlienEggPrefab()
+        {
+            var egg = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            egg.name = "AlienEgg";
+            egg.transform.localScale = new Vector3(0.34f, 0.46f, 0.34f);
+            Object.DestroyImmediate(egg.GetComponent<Collider>());
+            egg.GetComponent<Renderer>().sharedMaterial = GreyboxMaterials.Get("AlienEgg", new Color(0.35f, 1f, 0.25f), emission: 1.6f);
+            Directory.CreateDirectory(Path.GetDirectoryName(AlienEggPrefabPath));
+            var prefab = PrefabUtility.SaveAsPrefabAsset(egg, AlienEggPrefabPath);
+            Object.DestroyImmediate(egg);
+            return prefab;
+        }
+
+        public static GameEventWithHiddenItem EnsureHiddenItemEvent(string fileName)
+        {
+            string path = $"{EventsFolder}/{fileName}.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<GameEventWithHiddenItem>(path);
+            if (existing != null) return existing;
+            Directory.CreateDirectory(EventsFolder);
+            var evt = ScriptableObject.CreateInstance<GameEventWithHiddenItem>();
+            AssetDatabase.CreateAsset(evt, path);
+            return evt;
         }
 
         /// <summary>A soft white ring (generated once) for the cryo timer's radial fill.</summary>
@@ -166,6 +202,14 @@ namespace OrbitalCargo.Crates.EditorTools
             BuildCryoRing(root, crate);
             BuildVolatileBeacon(root, crate);
 
+            // Where a hidden item's model appears during the X-ray (crate centre).
+            var hiddenAnchor = new GameObject("HiddenItem").transform;
+            hiddenAnchor.SetParent(root.transform, false);
+            hiddenAnchor.localPosition = new Vector3(0f, CrateSize * 0.5f, 0f);
+            Assign(visuals, "hiddenAnchor", hiddenAnchor);
+
+            BuildSuspiciousTell(root, crate, casing.transform, stripe.transform);
+
             Directory.CreateDirectory(Path.GetDirectoryName(CratePrefabPath));
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, CratePrefabPath);
             Object.DestroyImmediate(root);
@@ -221,6 +265,67 @@ namespace OrbitalCargo.Crates.EditorTools
             var effect = root.AddComponent<VolatileEffect>();
             Assign(effect, "crate", crate);
             Assign(effect, "beacon", renderer);
+        }
+
+        // Suspicious tells: body shake plus sparks (crackling on the lid) or green goo (dripping off the edges).
+        private static void BuildSuspiciousTell(GameObject root, Crate crate, Transform casing, Transform stripe)
+        {
+            var tells = new GameObject("Tells").transform;
+            tells.SetParent(root.transform, false);
+
+            var sparks = NewParticles("Sparks", tells, new Vector3(0f, CrateSize + 0.02f, 0f), GreyboxMaterials.GetParticle("Spark", new Color(1f, 0.85f, 0.3f)));
+            var sm = sparks.main;
+            sm.startLifetime = new ParticleSystem.MinMaxCurve(0.2f, 0.45f);
+            sm.startSpeed = new ParticleSystem.MinMaxCurve(1.2f, 2.8f);
+            sm.startSize = new ParticleSystem.MinMaxCurve(0.04f, 0.08f);
+            sm.startColor = new Color(1f, 0.85f, 0.3f);
+            sm.gravityModifier = 1.2f;
+            var se = sparks.emission;
+            se.rateOverTime = 0f;
+            se.SetBursts(new[] { new ParticleSystem.Burst(0f, 6, 10, -1, 0.5f) }); // crackle every half second
+            var ss = sparks.shape;
+            ss.shapeType = ParticleSystemShapeType.Box;
+            ss.scale = new Vector3(CrateSize * 0.9f, 0.02f, CrateSize * 0.9f);
+
+            var drip = NewParticles("Drip", tells, new Vector3(0f, CrateSize * 0.92f, 0f), GreyboxMaterials.GetParticle("Goo", new Color(0.35f, 1f, 0.2f)));
+            var dm = drip.main;
+            dm.startLifetime = new ParticleSystem.MinMaxCurve(0.7f, 1.1f);
+            dm.startSpeed = new ParticleSystem.MinMaxCurve(0f, 0.15f);
+            dm.startSize = new ParticleSystem.MinMaxCurve(0.07f, 0.12f);
+            dm.startColor = new Color(0.35f, 1f, 0.2f);
+            dm.gravityModifier = 0.9f;
+            var de = drip.emission;
+            de.rateOverTime = 7f;
+            var ds = drip.shape;
+            ds.shapeType = ParticleSystemShapeType.BoxEdge;
+            ds.scale = new Vector3(CrateSize * 1.02f, 0.02f, CrateSize * 1.02f);
+
+            var tell = root.AddComponent<SuspiciousTell>();
+            var so = new SerializedObject(tell);
+            so.FindProperty("crate").objectReferenceValue = crate;
+            var parts = so.FindProperty("shakeParts");
+            parts.arraySize = 2;
+            parts.GetArrayElementAtIndex(0).objectReferenceValue = casing;
+            parts.GetArrayElementAtIndex(1).objectReferenceValue = stripe;
+            so.FindProperty("sparks").objectReferenceValue = sparks;
+            so.FindProperty("drip").objectReferenceValue = drip;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static ParticleSystem NewParticles(string name, Transform parent, Vector3 localPosition, Material material)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPosition;
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.loop = true;
+            main.playOnAwake = false;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = 60;
+            go.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
+            return ps;
         }
 
         private static UnityEngine.UI.Image NewImage(string name, RectTransform parent, Sprite sprite, Color color)

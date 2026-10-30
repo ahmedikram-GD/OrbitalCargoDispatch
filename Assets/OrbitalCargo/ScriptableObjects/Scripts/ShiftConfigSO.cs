@@ -37,6 +37,12 @@ namespace OrbitalCargo.Config
         [Tooltip("Fine when a launch ships one or more bad crates. Applied once per launch.")]
         [Min(0)] public int UnscannedBadFine = 30;
 
+        [Header("News alert")]
+        [Tooltip("Seconds after a launch with bad cargo before the news breaks (and the fine lands).")]
+        [Min(0f)] public float NewsAlertDelay = 1.5f;
+        [Tooltip("Ticker text. {0} = the item's headline, {1} = the fine.")]
+        public string NewsFormat = "BREAKING: {0}  Dispatcher fined {1} ¢";
+
         [Header("Upgrades")]
         [Min(0)] public int GravSledPrice = 150;
         [Min(1)] public int CarryCapacityBase = 1;
