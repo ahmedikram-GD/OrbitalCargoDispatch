@@ -17,26 +17,32 @@ using UnityEngine.UI;
 namespace OrbitalCargo.UI.EditorTools
 {
     /// <summary>
-    /// Builds <c>Hud.prefab</c>: the credits counter (kit <see cref="CoinsWidget"/>), the coin layer
-    /// with the kit <see cref="UICollector"/> trail, and the <see cref="PayoutPopupPresenter"/> "+60 ¢"
-    /// pop. A separate overlay canvas above the touch controls with no raycaster, so it never steals
-    /// touches. Slice 6 folds this into the FSM's ShiftHud view; the pieces carry over unchanged.
+    /// Builds <c>Resources/ShiftHud.prefab</c>, the FSM-pooled HUD (<see cref="HudView"/> : kit GameHud):
+    /// credits counter (kit <see cref="CoinsWidget"/>), coin layer with the kit <see cref="UICollector"/>
+    /// trail, the <see cref="PayoutPopupPresenter"/> "+60 ¢" pop, collection card, news ticker, the shift
+    /// label + mm:ss timer and the pause button. Root = Canvas (override sorting; the FSM sets the order)
+    /// + CanvasGroup + raycaster; everything but the pause button is raycast-transparent so the touch
+    /// controls underneath keep working.
     /// </summary>
     public static class HudBuilder
     {
-        public const string HudPrefabPath = "Assets/OrbitalCargo/Prefabs/UI/Hud.prefab";
+        public const string HudPrefabPath = "Assets/OrbitalCargo/Prefabs/UI/Resources/ShiftHud.prefab";
+        private const string LegacyHudPrefabPath = "Assets/OrbitalCargo/Prefabs/UI/Hud.prefab";
 
         [MenuItem("Tools/OrbitalCargo/Build HUD Prefab")]
         public static GameObject BuildHudPrefab()
         {
-            var root = new GameObject("Hud", typeof(RectTransform));
+            // Nested under the scene's UIStates canvas, which owns the 1920×1080 scaler.
+            var root = new GameObject("ShiftHud", typeof(RectTransform));
             var canvas = root.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            // The overrideSorting setter is ignored on a root canvas, so it would not be saved in the prefab;
+            // the serialized flag sticks and takes effect once the view is nested under UIStates.
+            var canvasSo = new SerializedObject(canvas);
+            canvasSo.FindProperty("m_OverrideSorting").boolValue = true;
+            canvasSo.ApplyModifiedPropertiesWithoutUndo();
             canvas.sortingOrder = 10;
-            var scaler = root.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            root.AddComponent<CanvasGroup>();
+            root.AddComponent<GraphicRaycaster>();
 
             var knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
             var panelSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
@@ -111,6 +117,17 @@ namespace OrbitalCargo.UI.EditorTools
             Assign(presenter, "coinTarget", icon);
             Assign(presenter, "payoutLabel", labelText);
 
+            var timer = BuildShiftPanel(root.transform, panelSprite);
+            var pause = BuildPauseButton(root.transform, panelSprite);
+
+            var view = root.AddComponent<HudView>();
+            Assign(view, "currentStateSortingOrder", CoreAssetFactory.Load<Int>(Flow.EditorTools.FlowAssetFactory.SortingOrderPath));
+            Assign(view, "onShiftTick", CoreAssetFactory.LoadEvent<GameEventWithInt>("e_ShiftTick"));
+            Assign(view, "timerText", timer.timer);
+            Assign(view, "shiftText", timer.shift);
+            Assign(view, "pauseButton", pause);
+
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(LegacyHudPrefabPath) != null) AssetDatabase.DeleteAsset(LegacyHudPrefabPath);
             Directory.CreateDirectory(Path.GetDirectoryName(HudPrefabPath));
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, HudPrefabPath);
             Object.DestroyImmediate(root);
@@ -169,6 +186,39 @@ namespace OrbitalCargo.UI.EditorTools
             Assign(view, "onNewsAlert", CoreAssetFactory.LoadEvent<GameEventWithString>("e_NewsAlert"));
             Assign(view, "banner", banner);
             Assign(view, "label", label);
+        }
+
+        // Shift label over a mm:ss timer, top centre.
+        private static (TextMeshProUGUI shift, TextMeshProUGUI timer) BuildShiftPanel(Transform root, Sprite panelSprite)
+        {
+            var panel = Rect("ShiftPanel", root, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(300f, 130f), new Vector2(0f, -30f), new Vector2(0.5f, 1f));
+            var bg = panel.gameObject.AddComponent<Image>();
+            bg.sprite = panelSprite;
+            bg.type = Image.Type.Sliced;
+            bg.color = new Color(0.05f, 0.07f, 0.1f, 0.75f);
+            bg.raycastTarget = false;
+
+            var shift = Text("Shift", panel, new Vector2(10f, 78f), new Vector2(-10f, -6f), 30f, new Color(0.6f, 0.8f, 1f), TextAlignmentOptions.Center);
+            shift.text = "SHIFT 1";
+            var timer = Text("Timer", panel, new Vector2(10f, 6f), new Vector2(-10f, -44f), 64f, Color.white, TextAlignmentOptions.Center);
+            timer.text = "5:00";
+            return (shift, timer);
+        }
+
+        // Pause, top-right: the only raycast target on the HUD.
+        private static Button BuildPauseButton(Transform root, Sprite panelSprite)
+        {
+            var rt = Rect("PauseButton", root, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(110f, 110f), new Vector2(-40f, -30f), new Vector2(1f, 1f));
+            var image = rt.gameObject.AddComponent<Image>();
+            image.sprite = panelSprite;
+            image.type = Image.Type.Sliced;
+            image.color = new Color(0.05f, 0.07f, 0.1f, 0.75f);
+            var button = rt.gameObject.AddComponent<Button>();
+            button.targetGraphic = image;
+
+            var label = Text("Label", rt, Vector2.zero, Vector2.zero, 56f, Color.white, TextAlignmentOptions.Center);
+            label.text = "II";
+            return button;
         }
 
         private static TextMeshProUGUI Text(string name, Transform parent, Vector2 offsetMin, Vector2 offsetMax, float size, Color color, TextAlignmentOptions align)

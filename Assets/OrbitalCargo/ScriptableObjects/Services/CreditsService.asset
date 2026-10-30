@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Economy.CreditsService
   credits: {fileID: 11400000, guid: 2082da3db4113cb418602ab486af3b5d, type: 2}
   balanceChanged: {fileID: 11400000, guid: bdb266c77b1e65c419d9156d58054695, type: 2}
+  creditsEarned: {fileID: 11400000, guid: 738705bb65126fe47b62fd33f200240b, type: 2}

@@ -16,6 +16,8 @@ namespace OrbitalCargo.Economy
         [SerializeField] private DBInt credits;
         [Tooltip("e_CreditsChanged — snap the HUD counter to the new balance.")]
         [SerializeField] private GameEvent balanceChanged;
+        [Tooltip("e_CreditsEarned (int) — every positive Add, so the shift tally counts launches, chute payouts and anything added later without knowing their rules.")]
+        [SerializeField] private GameEventWithInt creditsEarned;
 
         public int Balance => credits != null ? credits.GetValue() : 0;
 
@@ -29,6 +31,7 @@ namespace OrbitalCargo.Economy
             if (credits == null || amount == 0) return;
             credits.SetValue(Mathf.Max(0, credits.GetValue() + amount));
             if (!deferDisplay) RaiseChanged();
+            if (amount > 0 && creditsEarned != null) creditsEarned.Raise(amount);
         }
 
         public bool TrySpend(int amount)

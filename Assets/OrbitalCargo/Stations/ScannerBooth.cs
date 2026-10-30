@@ -120,6 +120,24 @@ namespace OrbitalCargo.Stations
             return true;
         }
 
+        /// <summary>
+        /// Shift end: abort any reveal and hand back the crate in the booth (null if empty) without a
+        /// result. The caller disposes of it; the booth is idle again.
+        /// </summary>
+        public Crate Evict()
+        {
+            _scan?.Kill();
+            _scan = null;
+            IsScanning = false;
+            if (_scanLineRenderer != null) _scanLineRenderer.enabled = false;
+
+            var crate = Occupant;
+            if (crate != null) crate.StateChanged -= HandleOccupantStateChanged;
+            Occupant = null;
+            SetLight(idleLight);
+            return crate;
+        }
+
         // ── Helpers ────────────────────────────────────────────────────────────
 
         private void FinishScan(Crate crate, CrateVisuals visuals)

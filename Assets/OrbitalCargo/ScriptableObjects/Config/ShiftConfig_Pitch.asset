@@ -22,6 +22,8 @@ MonoBehaviour:
   WrongBayMultiplier: 0.5
   ChuteBonus: 25
   UnscannedBadFine: 30
+  NewsAlertDelay: 1.5
+  NewsFormat: "BREAKING: {0}  Dispatcher fined {1} \xA2"
   GravSledPrice: 150
   CarryCapacityBase: 1
   CarryCapacityGravSled: 3

@@ -12,7 +12,8 @@ namespace OrbitalCargo.Stations
     /// <see cref="SpawnScheduler"/> and puts them on the <see cref="Conveyor"/> from the crate pool
     /// whenever the airlock is clear — spawns that come due while the belt is backed up wait their
     /// turn instead of overlapping. Raises e_CrateSpawned and, for the first crate of a beat entry,
-    /// e_RadioBeat (Rook's lines, Slice 7).
+    /// e_RadioBeat (Rook's lines, Slice 7). <c>ShiftController</c> drives Begin/Stop and, at shift end,
+    /// asks for every crate still in play (<see cref="CollectLive"/>) so strays on the floor go too.
     /// </summary>
     [AddComponentMenu("OrbitalCargo/Stations/Crate Spawner")]
     public sealed class CrateSpawner : MonoBehaviour
@@ -21,17 +22,13 @@ namespace OrbitalCargo.Stations
 
         [SerializeField] private Conveyor conveyor;
         [SerializeField] private PoolManagerSO cratePooler;
-        [Tooltip("ShiftConfig_Pitch — provides the schedule when starting on its own.")]
-        [SerializeField] private ShiftConfigSO config;
-        [Tooltip("Start the pitch schedule on scene start. Temporary: the Slice 6 ShiftController calls Begin instead.")]
-        [SerializeField] private bool beginOnStart = true;
-
         [Header("Events")]
         [SerializeField] private GameEventWithCrate onCrateSpawned;
         [SerializeField] private GameEventWithString onRadioBeat;
 
         private readonly Queue<SpawnRequest> _pending = new Queue<SpawnRequest>();
         private readonly List<SpawnRequest> _due = new List<SpawnRequest>();
+        private readonly HashSet<Crate> _spawned = new HashSet<Crate>();
         private SpawnScheduler _scheduler;
 
         public float Elapsed { get; private set; }
@@ -39,11 +36,6 @@ namespace OrbitalCargo.Stations
         public int PendingCount => _pending.Count;
 
         // ── Lifecycle ──────────────────────────────────────────────────────────
-
-        private void Start()
-        {
-            if (beginOnStart && config != null && config.Schedule != null) Begin(config.Schedule);
-        }
 
         private void Update()
         {
@@ -79,6 +71,18 @@ namespace OrbitalCargo.Stations
         /// <summary>Queue one extra crate for the belt (debug keys, tutorials).</summary>
         public void Enqueue(SpawnRequest request) => _pending.Enqueue(request);
 
+        /// <summary>
+        /// Adds every crate this spawner put out that is still in play (active, not consumed) to
+        /// <paramref name="into"/>, then forgets them all — pooled crates get re-tracked when respawned.
+        /// </summary>
+        public void CollectLive(List<Crate> into)
+        {
+            foreach (var crate in _spawned)
+                if (crate != null && crate.gameObject.activeInHierarchy && crate.State != CrateState.Consumed && !into.Contains(crate))
+                    into.Add(crate);
+            _spawned.Clear();
+        }
+
         // ── Helpers ────────────────────────────────────────────────────────────
 
         /// <summary>Put one crate on the belt. False (nothing spawned) if the pool or belt refused it.</summary>
@@ -99,6 +103,7 @@ namespace OrbitalCargo.Stations
                 return false;
             }
 
+            _spawned.Add(crate);
             if (onCrateSpawned != null) onCrateSpawned.Raise(crate);
             if (!string.IsNullOrEmpty(request.RadioBeat) && onRadioBeat != null) onRadioBeat.Raise(request.RadioBeat);
             return true;

@@ -99,7 +99,6 @@ namespace OrbitalCargo.Stations.EditorTools
             var sso = new SerializedObject(spawner);
             sso.FindProperty("conveyor").objectReferenceValue = conveyor;
             sso.FindProperty("cratePooler").objectReferenceValue = CoreAssetFactory.Load<PoolManagerSO>(CoreAssetFactory.CratePoolerPath);
-            sso.FindProperty("config").objectReferenceValue = shiftConfig;
             sso.FindProperty("onCrateSpawned").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateSpawned");
             sso.FindProperty("onRadioBeat").objectReferenceValue = CoreAssetFactory.LoadEvent<GameKit.Architecture.Events.GameEventWithString>("e_RadioBeat");
             sso.ApplyModifiedPropertiesWithoutUndo();

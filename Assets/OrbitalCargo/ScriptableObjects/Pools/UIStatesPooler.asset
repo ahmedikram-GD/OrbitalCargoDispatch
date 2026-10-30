@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a325d613c65bd8a44a7b77d71af6cd6b, type: 3}
+  m_Name: UIStatesPooler
+  m_EditorClassIdentifier: GameKit.Runtime::GameKit.Architecture.PoolSystem.PoolManagerSO
+  _poolConfigs:
+  - PoolID: ShiftHud
+    Prefab: {fileID: 5937930282427934474, guid: e3a849ca70b86e44b8598726f9cbaf3b, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 2
+    Prewarm: 1
+  - PoolID: PausePanel
+    Prefab: {fileID: 9901786435083091, guid: e5cab3a81f757544eb529269a38c540c, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 2
+    Prewarm: 1
+  - PoolID: ShiftSummary
+    Prefab: {fileID: 6969251073863427034, guid: 63eec453824393540a7b92306b95498e, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 2
+    Prewarm: 1

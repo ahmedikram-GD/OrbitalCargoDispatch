@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35f32f8ce75b2924182ed3a984477464, type: 3}
+  m_Name: ShiftSummaryState
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Flow.ShiftSummaryState
+  PausePreviousState: 0
+  ShowBanner: 0
+  stateId: ShiftSummary
+  usePooling: 1
+  uIStatesPooler: {fileID: 11400000, guid: b4720b023d255364ebf39a17ae73df68, type: 2}
+  session: {fileID: 11400000, guid: 45a2ee7919b346e4d8d8400ae2667faa, type: 2}
+  credits: {fileID: 11400000, guid: 3324644fd2b7065479ad09df002f310c, type: 2}
+  upgrades: {fileID: 11400000, guid: 2b99caa8ed4bb4940ac4534083c8bd58, type: 2}
+  ads: {fileID: 11400000, guid: 890753a556f69774da3224b5109dc490, type: 2}
+  onNextShiftPressed: {fileID: 11400000, guid: 620e2125c64759c4aaea4f9c85a79692, type: 2}
+  onDoublePayoutClaimed: {fileID: 11400000, guid: 054a2e0648e7a67478999ebdad50e9b8, type: 2}
+  onGamePaused: {fileID: 11400000, guid: 88c7b148796280648b6df2c4d95d86df, type: 2}
