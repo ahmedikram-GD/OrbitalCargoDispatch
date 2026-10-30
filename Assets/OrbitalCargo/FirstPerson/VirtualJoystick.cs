@@ -67,10 +67,14 @@ namespace OrbitalCargo.FirstPerson
         {
             IsPressed = true;
             if (hideUntilTouched) SetVisualVisible(true);
+            // Place the stick by WORLD position, not anchoredPosition: a parent-local point is measured
+            // from the parent's pivot while anchoredPosition is measured from the background's anchors, so
+            // the SJ original put the stick half a zone away from the finger (instant full deflection)
+            // whenever its anchors weren't centred. World space is anchor-independent.
             if (floating && background != null && background.parent is RectTransform parent
-                && RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, eventData.position, _uiCamera, out var localInParent))
+                && RectTransformUtility.ScreenPointToWorldPointInRectangle(parent, eventData.position, _uiCamera, out var worldPoint))
             {
-                background.anchoredPosition = localInParent;
+                background.position = worldPoint;
             }
             OnDrag(eventData);
         }
