@@ -41,5 +41,38 @@ namespace OrbitalCargo.Room.EditorTools
             AssetDatabase.CreateAsset(mat, path);
             return mat;
         }
+
+        /// <summary>
+        /// Alpha-blended URP Unlit material (ghosts, x-ray casing previews). Alpha comes from
+        /// <paramref name="color"/>.a. Created once like <see cref="Get"/>.
+        /// </summary>
+        public static Material GetTransparent(string role, Color color)
+        {
+            string path = $"{Folder}/M_{role}.mat";
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (existing != null) return existing;
+
+            Directory.CreateDirectory(Folder);
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null)
+            {
+                Debug.LogError("[GreyboxMaterials] URP Unlit shader not found — is URP the active pipeline?");
+                return null;
+            }
+
+            var mat = new Material(shader) { name = $"M_{role}" };
+            mat.SetColor("_BaseColor", color);
+            mat.SetFloat("_Surface", 1f); // Transparent
+            mat.SetFloat("_Blend", 0f);   // Alpha
+            mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+
+            AssetDatabase.CreateAsset(mat, path);
+            return mat;
+        }
     }
 }

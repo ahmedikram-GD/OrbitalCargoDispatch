@@ -1,5 +1,9 @@
 using System.IO;
+using OrbitalCargo.Crates.EditorTools;
 using OrbitalCargo.FirstPerson;
+using OrbitalCargo.Interaction;
+using OrbitalCargo.UI;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -59,14 +63,28 @@ namespace OrbitalCargo.FirstPerson.EditorTools
             camGo.AddComponent<AudioListener>();
             var bob = camGo.AddComponent<CameraBobController>();
 
+            // Crate pivot is its bottom centre, so this is where the bottom of a carried crate sits:
+            // low and to the right, clear of the crosshair.
             var hold = new GameObject("HoldPoint").transform;
             hold.SetParent(camGo.transform, false);
-            hold.localPosition = new Vector3(0.35f, -0.35f, 0.8f);
+            hold.localPosition = new Vector3(0.3f, -0.55f, 0.85f);
 
             Assign(motor, "config", LoadConfig<MovementConfigSO>("FP_MovementConfig"));
             Assign(look, "config", LoadConfig<LookConfigSO>("FP_LookConfig"));
             Assign(look, "cameraPivot", camGo.transform);
             Assign(bob, "config", LoadConfig<CameraBobConfigSO>("FP_CameraBobConfig"));
+
+            // Interaction (Slice 2): input latch, hands, centre-ray brain.
+            var interactionConfig = LoadConfig<InteractionConfigSO>("FP_InteractionConfig");
+            root.AddComponent<InteractionInputProvider>();
+            var carrier = root.AddComponent<CrateCarrier>();
+            var interactor = root.AddComponent<CrateInteractor>();
+            Assign(carrier, "config", interactionConfig);
+            Assign(carrier, "holdPoint", hold);
+            Assign(interactor, "config", interactionConfig);
+            Assign(interactor, "aim", camGo.transform);
+            Assign(interactor, "carrier", carrier);
+            Assign(interactor, "onCratePicked", CrateAssetFactory.EnsureCrateEvent("e_CratePicked"));
 
             return SavePrefab(root, PlayerPrefabPath);
         }
@@ -118,6 +136,33 @@ namespace OrbitalCargo.FirstPerson.EditorTools
             crossImage.sprite = knob;
             crossImage.color = new Color(1f, 1f, 1f, 0.85f);
             crossImage.raycastTarget = false;
+
+            // 4) Context button (Pick up / Place / ...), bottom-right. Hidden until there's something to do.
+            var ctx = Rect("ContextButton", root.transform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(240f, 240f), new Vector2(-240f, 220f));
+            var ctxImage = ctx.gameObject.AddComponent<Image>();
+            ctxImage.sprite = knob;
+            ctxImage.color = new Color(0.15f, 0.85f, 0.55f, 0.95f);
+            var ctxButton = ctx.gameObject.AddComponent<Button>();
+            ctxButton.targetGraphic = ctxImage;
+            var ctxGroup = ctx.gameObject.AddComponent<CanvasGroup>();
+            ctxGroup.alpha = 0f;
+            ctxGroup.blocksRaycasts = false;
+
+            var labelRt = Rect("Label", ctx, Vector2.zero, Vector2.one, new Vector2(-30f, -30f), Vector2.zero);
+            var label = labelRt.gameObject.AddComponent<TextMeshProUGUI>();
+            label.alignment = TextAlignmentOptions.Center;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 20f;
+            label.fontSizeMax = 40f;
+            label.fontStyle = FontStyles.Bold;
+            label.color = new Color(0.04f, 0.08f, 0.1f);
+            label.raycastTarget = false;
+            label.text = string.Empty;
+
+            var ctxView = ctx.gameObject.AddComponent<ContextButtonView>();
+            Assign(ctxView, "button", ctxButton);
+            Assign(ctxView, "label", label);
+            Assign(ctxView, "group", ctxGroup);
 
             return SavePrefab(root, ControlsPrefabPath);
         }

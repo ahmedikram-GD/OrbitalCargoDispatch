@@ -24,7 +24,8 @@ namespace OrbitalCargo.Room.EditorTools
         public static void BuildFromMenu()
         {
             var layout = LoadOrCreateDefaultLayout();
-            Build(layout);
+            var root = Build(layout);
+            Stations.EditorTools.StationWiring.Wire(layout, root.transform);
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         }
 
@@ -142,8 +143,9 @@ namespace OrbitalCargo.Room.EditorTools
                 Box("Marker", slot, new Vector3(0f, 0.005f, 0f), new Vector3(0.85f, 0.01f, 0.85f), markerMat, local: true, collider: false);
             }
 
-            // Tall coloured backboard so the bay reads from across the room.
-            Box("Backboard", bay, new Vector3(0f, 1.5f, padD * 0.5f + 0.2f), new Vector3(padW, 3f, 0.2f), padMat, local: true);
+            // Tall coloured backboard so the bay reads from across the room. It sits on the pad's local -Z:
+            // bays face the room (Yaw 180), so local +Z points INTO the room and would wall off the pad.
+            Box("Backboard", bay, new Vector3(0f, 1.5f, -(padD * 0.5f + 0.2f)), new Vector3(padW, 3f, 0.2f), padMat, local: true);
         }
 
         private static void BuildBooth(RoomLayoutSO layout, Transform root)

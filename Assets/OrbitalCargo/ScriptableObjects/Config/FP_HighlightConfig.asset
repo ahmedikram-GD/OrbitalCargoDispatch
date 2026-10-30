@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 896464fdd39d33c438cda930d9218b08, type: 3}
+  m_Name: FP_HighlightConfig
+  m_EditorClassIdentifier: FlipFurry.FirstPerson::FlipFurry.FirstPerson.Interaction.HighlightConfigSO
+  _developerDescription: 
+  MaskMaterial: {fileID: 2100000, guid: ed079def19c939745a13750cfe881cff, type: 2}
+  FillMaterial: {fileID: 2100000, guid: a5af658f0185eb4419aac7730f393bc0, type: 2}
+  OutlineColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+  OutlineWidth: 8
+  Mode: 1
+  Pulse: 1
+  PulseSpeed: 4.5
+  PulseAmount: 0.1

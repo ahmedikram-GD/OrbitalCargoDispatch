@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 308d289cb5029824fa346312eac7f5ba, type: 3}
+  m_Name: CT_Standard
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Config.CrateTypeSO
+  Id: standard
+  DisplayName: Standard
+  CasingMaterial: {fileID: 2100000, guid: 447e88fed140a5e4ca1a9710b11fc5b4, type: 2}
+  AccentColor: {r: 0.1, g: 0.1, b: 0.12, a: 1}
+  Destination: 0
+  Payout: 10
+  IsJunk: 0
+  CryoSeconds: 0
+  VolatileSlowMultiplier: 1
+  WobbleAmplitude: 0

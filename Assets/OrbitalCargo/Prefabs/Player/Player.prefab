@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 356183573436605981}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.35, y: -0.35, z: 0.8}
+  m_LocalPosition: {x: 0.3, y: -0.55, z: 0.85}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -197,6 +197,9 @@ GameObject:
   - component: {fileID: 5337284204923323338}
   - component: {fileID: 5918197085990518301}
   - component: {fileID: 675465696239956682}
+  - component: {fileID: 5125391348693107681}
+  - component: {fileID: 4238872176929303376}
+  - component: {fileID: 2099836788763279265}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -301,3 +304,45 @@ MonoBehaviour:
   joystick: {fileID: 0}
   lookArea: {fileID: 0}
   allowKeyboardMouse: 1
+--- !u!114 &5125391348693107681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8823348177385490186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fea12434543ae764dad21660f36f59b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Interaction.InteractionInputProvider
+--- !u!114 &4238872176929303376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8823348177385490186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f86872cd49150c84da4f17957f33ddf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Interaction.CrateCarrier
+  config: {fileID: 11400000, guid: 9dff68b6164500247acb2544d9474686, type: 2}
+  holdPoint: {fileID: 533557671840882985}
+--- !u!114 &2099836788763279265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8823348177385490186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfc92e8f8e40f7d4e9324723fe80f1ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Interaction.CrateInteractor
+  config: {fileID: 11400000, guid: 9dff68b6164500247acb2544d9474686, type: 2}
+  aim: {fileID: 1087717942269175039}
+  carrier: {fileID: 4238872176929303376}
+  onCratePicked: {fileID: 11400000, guid: 1eb394651a48a144c9e90e29ecc55016, type: 2}

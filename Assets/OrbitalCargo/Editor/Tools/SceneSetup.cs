@@ -1,6 +1,11 @@
+using OrbitalCargo.Crates;
+using OrbitalCargo.Crates.EditorTools;
 using OrbitalCargo.FirstPerson;
 using OrbitalCargo.FirstPerson.EditorTools;
+using OrbitalCargo.Interaction;
 using OrbitalCargo.Room.EditorTools;
+using OrbitalCargo.Stations.EditorTools;
+using OrbitalCargo.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -8,24 +13,36 @@ using UnityEngine;
 namespace OrbitalCargo.Shift.EditorTools
 {
     /// <summary>
-    /// One-click (or batchmode) setup of <c>Game.unity</c> for Slice 1: builds the greybox room, the
-    /// Player and Controls prefabs, replaces the template camera with the player's camera, adds an
-    /// EventSystem, and wires the mobile input provider to the scene's joystick and look area.
-    /// Idempotent — re-running replaces what it placed before.
+    /// One-click (or batchmode) regeneration of <c>Game.unity</c>: crate assets, the greybox room and
+    /// its station wiring, the Player and Controls prefabs, the EventSystem, cross-prefab scene wiring,
+    /// and (until the conveyor lands in Slice 4) a few test crates on the belt. Idempotent — re-running
+    /// replaces everything it placed. Each slice extends this rather than hand-editing the scene.
+    /// <para>Refuses to run over unsaved scene changes so it never silently discards someone's edits.</para>
     /// <para>Batchmode: <c>Unity.exe -batchmode -quit -projectPath . -executeMethod
-    /// OrbitalCargo.Shift.EditorTools.SceneSetup.SetupSlice1</c></para>
+    /// OrbitalCargo.Shift.EditorTools.SceneSetup.SetupGameScene</c></para>
     /// </summary>
     public static class SceneSetup
     {
         public const string GameScenePath = "Assets/OrbitalCargo/Scenes/Game.unity";
+        private const string TempCratesName = "TempCrates";
 
-        [MenuItem("Tools/OrbitalCargo/Setup Game Scene (Slice 1)")]
-        public static void SetupSlice1()
+        [MenuItem("Tools/OrbitalCargo/Setup Game Scene")]
+        public static void SetupGameScene()
         {
+            var active = EditorSceneManager.GetActiveScene();
+            if (active.isDirty)
+            {
+                Debug.LogError($"[SceneSetup] '{active.name}' has unsaved changes — save or revert them, then run again.");
+                return;
+            }
+
             var scene = EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Single);
 
+            CrateAssetFactory.CreateAll();
+
             var layout = RoomBuilder.LoadOrCreateDefaultLayout();
-            RoomBuilder.Build(layout);
+            var room = RoomBuilder.Build(layout);
+            StationWiring.Wire(layout, room.transform);
 
             PlayerRigBuilder.BuildPrefabs();
 
@@ -34,6 +51,7 @@ namespace OrbitalCargo.Shift.EditorTools
             DestroyIfPresent("Player");
             DestroyIfPresent("Controls");
             DestroyIfPresent("EventSystem");
+            DestroyIfPresent(TempCratesName);
 
             var player = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PlayerRigBuilder.PlayerPrefabPath));
             player.transform.SetPositionAndRotation(layout.PlayerSpawn, Quaternion.Euler(0f, layout.PlayerYaw, 0f));
@@ -41,16 +59,56 @@ namespace OrbitalCargo.Shift.EditorTools
             var controls = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PlayerRigBuilder.ControlsPrefabPath));
             PlayerRigBuilder.CreateEventSystem();
 
-            // Scene-level wiring: the two prefabs are independent, so the link lives on the instance.
+            WireControls(player, controls);
+            PlaceTempCrates(layout);
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[SceneSetup] Game.unity regenerated (room + stations, player, controls, event system, test crates).");
+        }
+
+        // ── Wiring ─────────────────────────────────────────────────────────────
+
+        // The Player and Controls prefabs are independent, so their links live on the scene instances.
+        private static void WireControls(GameObject player, GameObject controls)
+        {
             var input = new SerializedObject(player.GetComponent<MobileMoveInputProvider>());
             input.FindProperty("joystick").objectReferenceValue = controls.GetComponentInChildren<VirtualJoystick>(true);
             input.FindProperty("lookArea").objectReferenceValue = controls.GetComponentInChildren<TouchLookArea>(true);
             input.ApplyModifiedPropertiesWithoutUndo();
 
-            EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
-            AssetDatabase.SaveAssets();
-            Debug.Log("[SceneSetup] Game.unity set up for Slice 1 (room, player, controls, event system).");
+            var ctx = new SerializedObject(controls.GetComponentInChildren<ContextButtonView>(true));
+            ctx.FindProperty("interactor").objectReferenceValue = player.GetComponent<CrateInteractor>();
+            ctx.FindProperty("input").objectReferenceValue = player.GetComponent<InteractionInputProvider>();
+            ctx.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // Slice 2 stand-in for the spawner: a standard, a cryo and a volatile crate resting on the belt.
+        private static void PlaceTempCrates(Config.RoomLayoutSO layout)
+        {
+            if (layout.ConveyorWaypoints.Length < 2) return;
+
+            var root = new GameObject(TempCratesName).transform;
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(CrateAssetFactory.CratePrefabPath);
+            Vector3 a = layout.ConveyorWaypoints[0];
+            Vector3 b = layout.ConveyorWaypoints[layout.ConveyorWaypoints.Length - 1];
+            Quaternion facing = Quaternion.LookRotation(new Vector3(b.x - a.x, 0f, b.z - a.z).normalized, Vector3.up);
+
+            string[] types = { "CT_Standard", "CT_Cryo", "CT_Volatile" };
+            float[] along = { 0.55f, 0.72f, 0.89f };
+            for (int i = 0; i < types.Length; i++)
+            {
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, root);
+                go.name = $"Crate_{types[i]}";
+                go.transform.SetPositionAndRotation(Vector3.Lerp(a, b, along[i]), facing);
+
+                var type = CrateAssetFactory.LoadType(types[i]);
+                var so = new SerializedObject(go.GetComponent<Crate>());
+                so.FindProperty("type").objectReferenceValue = type;
+                so.ApplyModifiedPropertiesWithoutUndo();
+                go.GetComponent<CrateVisuals>().Apply(type); // so the editor view matches play mode
+            }
         }
 
         private static void DestroyIfPresent(string name)

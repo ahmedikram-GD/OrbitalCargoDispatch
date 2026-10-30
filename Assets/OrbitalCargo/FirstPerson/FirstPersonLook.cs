@@ -84,9 +84,12 @@ namespace OrbitalCargo.FirstPerson
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetYaw, t);
             }
 
-            if (cameraPivot != null && to.sqrMagnitude > 1e-4f)
+            // Pitch is measured from the camera (eye height), not the body's feet — the SJ original
+            // used the body, so a target below eye level made the view look UP.
+            Vector3 fromEye = cameraPivot != null ? worldPoint - cameraPivot.position : to;
+            if (cameraPivot != null && fromEye.sqrMagnitude > 1e-4f)
             {
-                float desiredPitch = -Mathf.Atan2(to.y, flat.magnitude) * Mathf.Rad2Deg;
+                float desiredPitch = -Mathf.Atan2(fromEye.y, new Vector2(fromEye.x, fromEye.z).magnitude) * Mathf.Rad2Deg;
                 if (config != null) desiredPitch = Mathf.Clamp(desiredPitch, config.MinPitch, config.MaxPitch);
                 _pitch = Mathf.LerpAngle(_pitch, desiredPitch, t);
                 ApplyPitch();
