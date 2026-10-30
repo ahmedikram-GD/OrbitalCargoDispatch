@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a325d613c65bd8a44a7b77d71af6cd6b, type: 3}
+  m_Name: ParticlesPooler
+  m_EditorClassIdentifier: 
+  _poolConfigs:
+  - PoolID: HammerHit
+    Prefab: {fileID: 3873820842109475839, guid: eb27d74fb6a63b148a49374d7d8f62f9, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 20
+    Prewarm: 0
+  - PoolID: BlockHit
+    Prefab: {fileID: 3587659352515026817, guid: 615b820047eb93a49a9a652170702920, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 10
+    Prewarm: 0
+  - PoolID: IceBreakParticles
+    Prefab: {fileID: 8141271083664720264, guid: 5a724e4ecf3a6664eb32878ab1068ed0, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 15
+    Prewarm: 0
+  - PoolID: BlockBreakParticles
+    Prefab: {fileID: 5754413361831262455, guid: 7ad528594c0cf9041ac296b02ba16db2, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 15
+    Prewarm: 0
+  - PoolID: BlastBreakParticles
+    Prefab: {fileID: 8621813568799324032, guid: 81f7a7bcbaeca35409dc3f9b9f9e87ad, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 15
+    Prewarm: 0
+  - PoolID: WallExitParticles
+    Prefab: {fileID: 3818308520375417445, guid: 82b4f94ab1ad57f4bab127667d59f486, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 5
+    Prewarm: 0
+  - PoolID: RealisticBomb
+    Prefab: {fileID: 708980055926878365, guid: c155a5c56b57fb246aaf65d68509493b, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 10
+    Prewarm: 0
+  - PoolID: BombDiffuseFX
+    Prefab: {fileID: 6480799944118084173, guid: 93e392dc49b374f498d50c5e9776fe40, type: 3}
+    DefaultCapacity: 1
+    MaxSize: 10
+    Prewarm: 0
+  - PoolID: TileSelectedFX
+    Prefab: {fileID: 3338895491946391745, guid: 12532be76a833c1498c916050e5d52de, type: 3}
+    DefaultCapacity: 10
+    MaxSize: 100
+    Prewarm: 0
+  - PoolID: CheckpointBurstFX
+    Prefab: {fileID: 1795481795756861024, guid: 8c5a0627c9cc8cb42b92a305236d9383, type: 3}
+    DefaultCapacity: 8
+    MaxSize: 20
+    Prewarm: 0

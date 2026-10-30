@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aff971f3c725744dbe8ec3e7ab5f23f, type: 3}
+  m_Name: FP_CameraBobConfig
+  m_EditorClassIdentifier: FlipFurry.FirstPerson::FlipFurry.FirstPerson.Config.CameraBobConfigSO
+  _developerDescription: 
+  IdleVerticalAmplitude: 0.03
+  IdleHorizontalAmplitude: 0
+  IdleFrequency: 0.5
+  MoveSpeedThreshold: 0.3
+  WalkVerticalAmplitude: 0.022
+  WalkHorizontalAmplitude: 0.014
+  WalkFrequency: 1.6
+  RunSpeedThreshold: 5
+  RunVerticalAmplitude: 0.03
+  RunHorizontalAmplitude: 0.02
+  RunFrequency: 2.2
+  TransitionSmoothTime: 0.15

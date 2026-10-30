@@ -1,0 +1,22 @@
+{
+    "name": "GameKit.Runtime",
+    "rootNamespace": "GameKit",
+    "references": [
+        "Coroutines",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Lofelt.NiceVibrations",
+        "DOTween.Modules",
+        "Unity.InputSystem",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
