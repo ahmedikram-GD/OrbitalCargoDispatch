@@ -26,6 +26,16 @@ namespace OrbitalCargo.Config
             public Color Color;
         }
 
+        [Serializable]
+        public struct PropPlacement
+        {
+            [Tooltip("Kit model or prefab (e.g. Art/Kenney/SpaceStationKit/computer.fbx). Visual only — no collider is added.")]
+            public GameObject Prefab;
+            public Vector3 Position;
+            public float Yaw;
+            [Min(0.01f)] public float Scale;
+        }
+
         [Header("Shell")]
         [Tooltip("Inner floor size in metres (X = width, Y = depth along Z).")]
         public Vector2 RoomSize = new Vector2(16f, 12f);
@@ -68,6 +78,35 @@ namespace OrbitalCargo.Config
         [Min(0.3f)] public float ChuteRadius = 0.8f;
         [Tooltip("Upgrade terminal, by the door on the side wall opposite the airlock.")]
         public Vector3 TerminalPosition = new Vector3(7.3f, 0f, -3.5f);
+
+        // ── Art skin (optional) ────────────────────────────────────────────────
+        // Empty slots keep the greybox. Filled slots hide the matching greybox renderers (their colliders
+        // stay, so interaction and walking are unchanged) and tile the kit model in their place.
+
+        [Header("Art skin (optional — empty keeps the greybox)")]
+        [Tooltip("Floor tile model, tiled across the room (Kenney SpaceStationKit/floor-panel).")]
+        public GameObject FloorTile;
+        [Min(0.1f)] public float FloorTileScale = 2f;
+        [Tooltip("Optional material for every floor tile (e.g. the kit atlas tinted darker so colour-coded bays and crates pop). Empty = the model's own.")]
+        public Material FloorMaterial;
+        [Tooltip("Wall panel model, tiled along the four walls (Kenney SpaceStationKit/wall).")]
+        public GameObject WallPanel;
+        [Tooltip("Panel used for the middle of the far wall, where the planet glows through (SpaceStationKit/wall-window). Empty = WallPanel.")]
+        public GameObject WallWindowPanel;
+        [Tooltip("Uniform scale for wall panels; Kenney walls are 1 m tall, so WallHeight / 1.")]
+        [Min(0.1f)] public float WallPanelScale = 4f;
+        [Tooltip("Extra yaw on every wall panel, to flip a kit whose detailed face points the wrong way.")]
+        public float WallPanelYaw;
+        [Tooltip("Optional material for every wall panel. Empty = the model's own.")]
+        public Material WallMaterial;
+        [Tooltip("Model for the cargo shuttle hovering over each bay pad (Kenney SpaceKit/craft_cargoA). Replaces the canopy and engine pods.")]
+        public GameObject ShuttleModel;
+        [Min(0.01f)] public float ShuttleScale = 1.6f;
+        [Tooltip("Bay-local position of the shuttle model (above the slots, clear of the crates).")]
+        public Vector3 ShuttleOffset = new Vector3(0f, 1.9f, 0f);
+        public float ShuttleYaw = 90f;
+        [Tooltip("Set dressing: computers, containers, pipes... Visual only.")]
+        public PropPlacement[] Props = Array.Empty<PropPlacement>();
 
         /// <summary>Total slot count per bay (columns × rows).</summary>
         public int SlotsPerBay => SlotColumns * SlotRows;

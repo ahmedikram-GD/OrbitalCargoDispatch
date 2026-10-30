@@ -60,6 +60,7 @@ namespace OrbitalCargo.Room.EditorTools
             BuildBooth(layout, root.transform);
             BuildChute(layout, root.transform);
             BuildTerminal(layout, root.transform);
+            RoomSkinner.Apply(layout, root.transform); // art pass: no-op while the layout's skin slots are empty
 
             var spawn = new GameObject("PlayerSpawn").transform;
             spawn.SetParent(root.transform, false);

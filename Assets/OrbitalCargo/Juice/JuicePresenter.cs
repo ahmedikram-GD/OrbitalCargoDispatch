@@ -161,7 +161,7 @@ namespace OrbitalCargo.Juice
 
         private void HandleScanStarted(Crate crate)
         {
-            if (sound != null) sound.Play("Click");
+            if (sound != null) sound.Play("ScanHum");
             if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Selection);
         }
 

@@ -43,3 +43,64 @@ MonoBehaviour:
   ChutePosition: {x: 1.4, y: 0, z: -4.3}
   ChuteRadius: 0.8
   TerminalPosition: {x: 7.3, y: 0, z: -3.5}
+  FloorTile: {fileID: 919132149155446097, guid: 884774b813be2884c943da1f31e418a4, type: 3}
+  FloorTileScale: 2
+  FloorMaterial: {fileID: 2100000, guid: 45501980cc78d684ab33d4327fe1a975, type: 2}
+  WallPanel: {fileID: 919132149155446097, guid: 28d9b91a32cc4f74ca863d71d07febed, type: 3}
+  WallWindowPanel: {fileID: 919132149155446097, guid: a9f67c7ac1d144e40872a2fe938d3973, type: 3}
+  WallPanelScale: 4
+  WallPanelYaw: 0
+  WallMaterial: {fileID: 2100000, guid: 9805050235e7f8f4fbcb569c9f689bb4, type: 2}
+  ShuttleModel: {fileID: 919132149155446097, guid: 863512856bef9134cb84babd3acf13c0, type: 3}
+  ShuttleScale: 1.25
+  ShuttleOffset: {x: 0, y: 2.6, z: 0}
+  ShuttleYaw: 90
+  Props:
+  - Prefab: {fileID: 919132149155446097, guid: 0e417c7739806ab4db60d2c16587c294, type: 3}
+    Position: {x: 3.6, y: 0, z: -5.5}
+    Yaw: 0
+    Scale: 2
+  - Prefab: {fileID: 919132149155446097, guid: 0e417c7739806ab4db60d2c16587c294, type: 3}
+    Position: {x: 4.6, y: 0, z: -5.5}
+    Yaw: 0
+    Scale: 2
+  - Prefab: {fileID: 919132149155446097, guid: 7dd548cf9ee38d648b77fef27ce312e5, type: 3}
+    Position: {x: 7.3, y: 0, z: 1.6}
+    Yaw: 0
+    Scale: 2
+  - Prefab: {fileID: 919132149155446097, guid: 3035b32329dc360499b0365793e4be9d, type: 3}
+    Position: {x: 7.3, y: 0, z: 0.3}
+    Yaw: 15
+    Scale: 2
+  - Prefab: {fileID: 919132149155446097, guid: 3035b32329dc360499b0365793e4be9d, type: 3}
+    Position: {x: 6.1, y: 0, z: 1.7}
+    Yaw: -10
+    Scale: 2
+  - Prefab: {fileID: 919132149155446097, guid: 0282a1a348c26f8489dbff544053c523, type: 3}
+    Position: {x: 7, y: 0, z: 5.3}
+    Yaw: 90
+    Scale: 2
+  - Prefab: {fileID: 919132149155446097, guid: 3035b32329dc360499b0365793e4be9d, type: 3}
+    Position: {x: -5.2, y: 0, z: -5.3}
+    Yaw: 5
+    Scale: 2
+  - Prefab: {fileID: 919132149155446097, guid: 7dd548cf9ee38d648b77fef27ce312e5, type: 3}
+    Position: {x: -6.4, y: 0, z: -5.3}
+    Yaw: 0
+    Scale: 2
+  - Prefab: {fileID: 919132149155446097, guid: 1449c5d6363ad664d9303f582b235fa2, type: 3}
+    Position: {x: -7, y: 0, z: 5.2}
+    Yaw: 90
+    Scale: 2.5
+  - Prefab: {fileID: 919132149155446097, guid: b0d2394ec6422cd49adb49da8ad273cc, type: 3}
+    Position: {x: -7.2, y: 0, z: -0.8}
+    Yaw: 30
+    Scale: 2.5
+  - Prefab: {fileID: 919132149155446097, guid: 781b2621d661e1648a559eb2adff69ac, type: 3}
+    Position: {x: 7.3, y: 1.8, z: 1.6}
+    Yaw: -90
+    Scale: 1.5
+  - Prefab: {fileID: 919132149155446097, guid: 057d700498a5bda48b1b2821dccae3da, type: 3}
+    Position: {x: 7.85, y: 1.4, z: -1.2}
+    Yaw: -90
+    Scale: 2.5

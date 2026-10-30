@@ -28,7 +28,7 @@ MonoBehaviour:
     IsFadingOut: 0
   - soundName: Pickup
     type: 0
-    audioClip: {fileID: 8300000, guid: 1ae9f8ad63c8db84c88719b13dfd9858, type: 3}
+    audioClip: {fileID: 8300000, guid: 2ca3adbb29454064d89ca96efed9f6ec, type: 3}
     audioClips: []
     loop: 0
     playRandomClip: 0
@@ -41,7 +41,7 @@ MonoBehaviour:
     IsFadingOut: 0
   - soundName: Place
     type: 0
-    audioClip: {fileID: 8300000, guid: 1e527e7e990719b4db84849f862cbe71, type: 3}
+    audioClip: {fileID: 8300000, guid: a33ede136e19ada46b3fe93fc259ca11, type: 3}
     audioClips: []
     loop: 0
     playRandomClip: 0
@@ -54,7 +54,7 @@ MonoBehaviour:
     IsFadingOut: 0
   - soundName: Launch
     type: 0
-    audioClip: {fileID: 8300000, guid: 65b48633bd0c5e747b33c87d6921a577, type: 3}
+    audioClip: {fileID: 8300000, guid: 06a90ead762e51240ab5050059db5c6a, type: 3}
     audioClips: []
     loop: 0
     playRandomClip: 0
@@ -145,7 +145,7 @@ MonoBehaviour:
     IsFadingOut: 0
   - soundName: Throw
     type: 0
-    audioClip: {fileID: 8300000, guid: 1ae9f8ad63c8db84c88719b13dfd9858, type: 3}
+    audioClip: {fileID: 8300000, guid: 10131d58b0c348444a69d784a6a05e62, type: 3}
     audioClips: []
     loop: 0
     playRandomClip: 0
@@ -177,6 +177,19 @@ MonoBehaviour:
     playRandomClip: 0
     playOnAwake: 0
     volume: 0.9
+    pitch: 1
+    useRandomPitch: 0
+    minPitch: 0.95
+    maxPitch: 1.05
+    IsFadingOut: 0
+  - soundName: ScanHum
+    type: 0
+    audioClip: {fileID: 8300000, guid: a834b9ac32783de4f98d139395f0204e, type: 3}
+    audioClips: []
+    loop: 0
+    playRandomClip: 0
+    playOnAwake: 0
+    volume: 0.7
     pitch: 1
     useRandomPitch: 0
     minPitch: 0.95

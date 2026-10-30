@@ -334,6 +334,7 @@ namespace OrbitalCargo.Shift.EditorTools
             added |= AddSoundIfMissing(service, "Throw", "Pickup", SoundType.SFX, 0.7f, randomPitch: true);
             added |= AddSoundIfMissing(service, "RadioBlip", "Click", SoundType.UI, 0.6f, randomPitch: true);
             added |= AddSoundIfMissing(service, "ShiftEnd", "ScanGood", SoundType.SFX, 0.9f);
+            added |= AddSoundIfMissing(service, "ScanHum", "Click", SoundType.SFX, 0.7f);
             if (added) EditorUtility.SetDirty(service);
         }
 
