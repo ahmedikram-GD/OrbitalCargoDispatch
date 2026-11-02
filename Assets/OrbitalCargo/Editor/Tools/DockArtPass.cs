@@ -82,6 +82,7 @@ namespace OrbitalCargo.Room.EditorTools
             Conveyor(layout, room, root);
             HeroDockArt.Apply(room, root);
             Lighting(root);
+            DockEnvironmentArt.Apply(layout, root);
             if (AssetDatabase.LoadAssetAtPath<GameObject>(BlenderCrateArtPass.ModelPath) != null)
                 BlenderCrateArtPass.EnsureDockReflection(root);
             // Later bays retain their original shapes and colour coding during this first section pass.
@@ -297,6 +298,7 @@ namespace OrbitalCargo.Room.EditorTools
 
         internal static void Box(string name, Transform parent, Vector3 position, Vector3 size, Material material)
         {
+            if (_box == null) _box = BevelMesh();
             var go = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer));
             go.transform.SetParent(parent, false);
             go.transform.localPosition = position;

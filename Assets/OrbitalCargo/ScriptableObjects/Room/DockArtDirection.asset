@@ -26,3 +26,6 @@ MonoBehaviour:
   Emission: 0.75
   ContactShadows: 1
   ShadowStrength: 0.65
+  UseEnvironmentKit: 1
+  CornerBakedLightIntensity: 5
+  CornerRealtimeFill: 2

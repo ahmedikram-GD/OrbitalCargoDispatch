@@ -20,5 +20,9 @@ namespace OrbitalCargo.Config
         [Range(0f, 3f)] public float Emission = 1.4f;
         public bool ContactShadows = true;
         [Range(0f, 1f)] public float ShadowStrength = 0.65f;
+        [Header("Authored environment benchmark")]
+        public bool UseEnvironmentKit = true;
+        [Range(0f, 15f)] public float CornerBakedLightIntensity = 5f;
+        [Range(0f, 10f)] public float CornerRealtimeFill = 2f;
     }
 }
