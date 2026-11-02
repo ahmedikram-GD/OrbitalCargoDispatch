@@ -80,7 +80,7 @@ namespace OrbitalCargo.Room.EditorTools
             Hide(room.Find("Shell"));
             Shell(layout, root);
             Conveyor(layout, room, root);
-            BayA(room, root);
+            HeroDockArt.Apply(room, root);
             Lighting(root);
             // Later bays retain their original shapes and colour coding during this first section pass.
             foreach (string id in new[] { "B", "C" })
@@ -161,6 +161,10 @@ namespace OrbitalCargo.Room.EditorTools
                 Box("BayLane", shell, new Vector3(x, 0.006f, 1.5f), new Vector3(0.055f, 0.006f, 4.5f), amber);
             Box("StopLine", shell, new Vector3(-4.5f, 0.007f, 2.3f), new Vector3(3.7f, 0.006f, 0.10f), amber);
             Combine(shell, "Shell");
+            // The key acts as broad interior fill. Props cast contact shadows; the closed
+            // ceiling must not block this light, since the practical fixtures are unshadowed.
+            foreach (var renderer in shell.GetComponentsInChildren<MeshRenderer>())
+                renderer.shadowCastingMode = ShadowCastingMode.Off;
         }
 
         private static void Conveyor(RoomLayoutSO layout, Transform room, Transform root)
@@ -196,51 +200,13 @@ namespace OrbitalCargo.Room.EditorTools
             Combine(art, "Conveyor");
         }
 
-        private static void BayA(Transform room, Transform root)
-        {
-            var bay = room.Find("Bay_A");
-            if (bay == null) return;
-            var art = Group("BayA", root);
-            art.SetPositionAndRotation(bay.position, bay.rotation);
-            var dark = Mat("Frame", _theme.Frame);
-            var metal = Mat("Metal", _theme.Metal);
-            var panel = Mat("Panel", _theme.Panel);
-            var amber = Mat("Amber", _theme.Amber);
-            var cyan = Mat("Cyan", _theme.Cyan, _theme.Emission);
-            var board = bay.Find("Backboard");
-            if (board != null) board.GetComponent<Renderer>().sharedMaterial = dark;
-            for (int i = -1; i <= 1; i++)
-                Box("DockRearPanel", art, new Vector3(i * 1.05f, 1.4f, -1.32f), new Vector3(0.98f, 2.3f, 0.05f), panel);
-            var shuttle = bay.Find("Shuttle");
-            if (shuttle != null)
-                foreach (var renderer in shuttle.GetComponentsInChildren<Renderer>()) renderer.sharedMaterial = Mat("CargoShuttle", new Color(0.39f, 0.49f, 0.59f));
-            var pad = bay.Find("Pad");
-            if (pad != null) pad.GetComponent<Renderer>().sharedMaterial = panel;
-            Box("Header", art, new Vector3(0f, 3.25f, 1.45f), new Vector3(4.05f, 0.9f, 0.42f), dark);
-            Box("HeaderInset", art, new Vector3(0f, 3.25f, 1.69f), new Vector3(3.7f, 0.67f, 0.07f), panel);
-            foreach (float x in new[] { -1.95f, 1.95f })
-            {
-                Box("DockPillar", art, new Vector3(x, 1.55f, 1.45f), new Vector3(0.26f, 3.1f, 0.42f), metal);
-                Box("PillarAccent", art, new Vector3(x, 2.2f, 1.69f), new Vector3(0.08f, 0.45f, 0.025f), cyan);
-                Box("GuardPost", art, new Vector3(x, 0.48f, 0.9f), new Vector3(0.12f, 0.96f, 0.12f), dark);
-                Box("GuardRail", art, new Vector3(x, 0.92f, 0.25f), new Vector3(0.09f, 0.09f, 1.4f), amber);
-                Box("GuardPost", art, new Vector3(x, 0.48f, -0.4f), new Vector3(0.12f, 0.96f, 0.12f), dark);
-            }
-            Label("BayLetter", art, "A", new Vector3(1.25f, 3.28f, 1.75f), 0.68f, 0.9f);
-            Label("BayName", art, "HEAVY CARGO", new Vector3(-0.35f, 3.38f, 1.75f), 0.22f, 2.1f);
-            Label("BaySubtitle", art, "IRONFALL  /  DISPATCH 01", new Vector3(-0.35f, 3.13f, 1.75f), 0.105f, 2.1f);
-            FinishStationStyling(AssetDatabase.LoadAssetAtPath<RoomLayoutSO>(RoomBuilder.DefaultLayoutPath), room);
-            foreach (var renderer in bay.Find("Slots").GetComponentsInChildren<Renderer>()) renderer.sharedMaterial = Mat("Slot", new Color(0.36f, 0.49f, 0.57f));
-            Combine(art, "BayA");
-        }
-
         /// <summary>Repositions the live counter after station wiring creates it on a rebuilt room.</summary>
         public static void FinishStationStyling(RoomLayoutSO layout, Transform room)
         {
             if (layout == null || layout.ArtDirection == null || !layout.ArtDirection.Enabled) return;
             var counter = room.Find("Bay_A/FillCounter");
             if (counter == null) return;
-            counter.localPosition = new Vector3(0f, 2.65f, 1.75f);
+            counter.localPosition = new Vector3(0f, 1.85f, -1.30f);
             var label = counter.GetComponent<TextMeshPro>();
             if (label != null) label.fontSize = 2.5f;
         }
@@ -267,7 +233,10 @@ namespace OrbitalCargo.Room.EditorTools
                 Undo.RecordObject(light, "Interior dock light");
                 light.intensity = _theme.KeyIntensity;
                 light.color = new Color(1f, 0.86f, 0.68f);
-                light.shadows = LightShadows.None;
+                light.shadows = _theme.ContactShadows ? LightShadows.Soft : LightShadows.None;
+                light.shadowStrength = _theme.ShadowStrength;
+                light.shadowBias = 0.08f;
+                light.shadowNormalBias = 0.25f;
                 light.transform.rotation = Quaternion.Euler(65f, -25f, 0f);
             }
             foreach (Vector3 pos in new[] { new Vector3(-4.5f, 3.6f, 0f), new Vector3(3f, 3.6f, -2.5f), new Vector3(-4.5f, 3.6f, 4f) })
@@ -323,7 +292,7 @@ namespace OrbitalCargo.Room.EditorTools
             return go.transform;
         }
 
-        private static void Box(string name, Transform parent, Vector3 position, Vector3 size, Material material)
+        internal static void Box(string name, Transform parent, Vector3 position, Vector3 size, Material material)
         {
             var go = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer));
             go.transform.SetParent(parent, false);
@@ -356,7 +325,7 @@ namespace OrbitalCargo.Room.EditorTools
             return mat;
         }
 
-        private static void Label(string name, Transform parent, string text, Vector3 position, float height, float width)
+        internal static void Label(string name, Transform parent, string text, Vector3 position, float height, float width)
         {
             var go = new GameObject(name, typeof(TextMeshPro));
             go.transform.SetParent(parent, false);
@@ -381,7 +350,7 @@ namespace OrbitalCargo.Room.EditorTools
             }
         }
 
-        private static void Combine(Transform root, string prefix)
+        internal static void Combine(Transform root, string prefix)
         {
             var groups = new Dictionary<Material, List<CombineInstance>>();
             var parts = root.GetComponentsInChildren<MeshFilter>();
@@ -416,6 +385,10 @@ namespace OrbitalCargo.Room.EditorTools
             var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             if (existing == null) { AssetDatabase.CreateAsset(mesh, path); return mesh; }
             EditorUtility.CopySerialized(mesh, existing);
+            // CopySerialized preserves the GUID but can leave the editor's GPU buffer stale.
+            // Reassign vertices to invalidate that buffer before capturing or entering Play.
+            existing.vertices = mesh.vertices;
+            existing.UploadMeshData(false);
             Object.DestroyImmediate(mesh);
             EditorUtility.SetDirty(existing);
             return existing;

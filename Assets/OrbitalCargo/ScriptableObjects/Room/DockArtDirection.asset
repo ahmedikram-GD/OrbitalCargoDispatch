@@ -24,3 +24,5 @@ MonoBehaviour:
   KeyIntensity: 0.95
   FixtureIntensity: 3
   Emission: 0.75
+  ContactShadows: 1
+  ShadowStrength: 0.65

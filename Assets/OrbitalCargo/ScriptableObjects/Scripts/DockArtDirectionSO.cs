@@ -18,5 +18,7 @@ namespace OrbitalCargo.Config
         [Range(0f, 2f)] public float KeyIntensity = 0.65f;
         [Range(0f, 10f)] public float FixtureIntensity = 4f;
         [Range(0f, 3f)] public float Emission = 1.4f;
+        public bool ContactShadows = true;
+        [Range(0f, 1f)] public float ShadowStrength = 0.65f;
     }
 }
