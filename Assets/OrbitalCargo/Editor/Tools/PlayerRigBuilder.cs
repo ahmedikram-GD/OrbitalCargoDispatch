@@ -172,6 +172,9 @@ namespace OrbitalCargo.FirstPerson.EditorTools
             Assign(ctxView, "label", label);
             Assign(ctxView, "group", ctxGroup);
 
+            // 5) Onboarding overlay (lesson cards + pointing hand) over the real stick and button.
+            UI.EditorTools.TutorialOverlayBuilder.Build(root.transform, bg, ctx);
+
             return SavePrefab(root, ControlsPrefabPath);
         }
 

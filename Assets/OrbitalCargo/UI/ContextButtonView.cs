@@ -9,7 +9,8 @@ namespace OrbitalCargo.UI
     /// The bottom-right context button (Pick up / Place / Scan / Launch). Shows whatever the
     /// <see cref="CrateInteractor"/> currently offers, hides (and stops eating touches) when there is
     /// nothing to do, and turns a tap into an interact request on the input provider — the same latch
-    /// the E key feeds. Replaces Silly-Justice's InteractionButtonBinder + HeldItemButtonSwitcher pair.
+    /// the E key feeds. Turns red when the prompt is a warning (wrong bay). Replaces Silly-Justice's
+    /// InteractionButtonBinder + HeldItemButtonSwitcher pair.
     /// </summary>
     [AddComponentMenu("OrbitalCargo/UI/Context Button View")]
     public sealed class ContextButtonView : MonoBehaviour
@@ -19,13 +20,26 @@ namespace OrbitalCargo.UI
         [Tooltip("On this object. Alpha 0 + no raycasts when hidden, so the look area gets the touch.")]
         [SerializeField] private CanvasGroup group;
 
+        [Tooltip("Button fill while the prompt is a warning (crate aimed at the wrong bay).")]
+        [SerializeField] private Color warningColor = new Color(0.95f, 0.22f, 0.18f, 0.95f);
+
         [Header("Scene wiring (set by SceneSetup)")]
         [SerializeField] private CrateInteractor interactor;
         [SerializeField] private InteractionInputProvider input;
 
+        private Image _background;
+        private Color _normalColor;
+
         public Button Button => button;
+        public RectTransform Rect => (RectTransform)transform;
 
         // ── Lifecycle ──────────────────────────────────────────────────────────
+
+        private void Awake()
+        {
+            _background = button != null ? button.targetGraphic as Image : null;
+            if (_background != null) _normalColor = _background.color;
+        }
 
         private void OnEnable()
         {
@@ -54,6 +68,8 @@ namespace OrbitalCargo.UI
             }
             if (button != null) button.interactable = enabled;
             if (label != null) label.text = text;
+            if (_background != null)
+                _background.color = interactor != null && interactor.PromptIsWarning ? warningColor : _normalColor;
         }
 
         private void OnButtonClicked()

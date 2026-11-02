@@ -93,6 +93,7 @@ namespace OrbitalCargo.Shift.EditorTools
             var systems = BuildSystems(player, room.transform);
             BuildFlow(systems, player, room.transform, statesRoot, uiStatesRoot);
             BuildRadio(systems, room.transform);
+            BuildTutorial(systems, player, controls, room.transform);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -241,6 +242,7 @@ namespace OrbitalCargo.Shift.EditorTools
             jso.FindProperty("bob").objectReferenceValue = player.GetComponentInChildren<CameraBobController>(true);
             jso.FindProperty("onCratePicked").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CratePicked");
             jso.FindProperty("onCratePlaced").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CratePlaced");
+            jso.FindProperty("onWrongBay").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_WrongBay");
             jso.FindProperty("onShuttleLaunched").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
             jso.FindProperty("onCryoExpired").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CryoExpired");
             jso.FindProperty("onCrateThrown").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateThrown");
@@ -300,26 +302,49 @@ namespace OrbitalCargo.Shift.EditorTools
                 array.GetArrayElementAtIndex(i).objectReferenceValue = FlowAssetFactory.Event<GameEvent>(names[i]);
         }
 
-        // Rook: beat director + the guide arrow over Bay A.
+        // Rook: beat director (radio lines derived from play, incl. the first wrong-bay crate).
         private static void BuildRadio(GameObject systems, Transform room)
         {
-            GuideArrow arrow = null;
-            foreach (var bay in room.GetComponentsInChildren<Bay>(true))
-            {
-                if (bay.Id != Config.BayId.A) continue;
-                arrow = RadioAssetFactory.BuildArrow(room, bay.transform.position + Vector3.up * 2.6f);
-                break;
-            }
-
             var radio = new SerializedObject(systems.AddComponent<RookRadio>());
             radio.FindProperty("session").objectReferenceValue = FlowAssetFactory.Load<ShiftSessionSO>(FlowAssetFactory.SessionPath);
-            radio.FindProperty("arrow").objectReferenceValue = arrow;
             radio.FindProperty("onRadioBeat").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithString>("e_RadioBeat");
             radio.FindProperty("onShiftStarted").objectReferenceValue = FlowAssetFactory.Event<GameEvent>("e_ShiftStarted");
             radio.FindProperty("onShiftEnded").objectReferenceValue = FlowAssetFactory.Event<GameEvent>("e_ShiftEnded");
             radio.FindProperty("onCratePlaced").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CratePlaced");
+            radio.FindProperty("onWrongBay").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_WrongBay");
             radio.FindProperty("onShuttleLaunched").objectReferenceValue = CoreAssetFactory.LoadEvent<GameEventWithLaunchResult>("e_ShuttleLaunched");
             radio.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // First-shift onboarding: lesson director + the guide arrow it moves around the room.
+        private static void BuildTutorial(GameObject systems, GameObject player, GameObject controls, Transform room)
+        {
+            var arrow = RadioAssetFactory.BuildArrow(room, Vector3.up * 3f);
+
+            var director = new SerializedObject(systems.AddComponent<TutorialDirector>());
+            director.FindProperty("script").objectReferenceValue = RadioAssetFactory.EnsureTutorialScript();
+            director.FindProperty("session").objectReferenceValue = FlowAssetFactory.Load<ShiftSessionSO>(FlowAssetFactory.SessionPath);
+            director.FindProperty("shift").objectReferenceValue = systems.GetComponent<ShiftController>();
+            director.FindProperty("player").objectReferenceValue = player.GetComponent<FirstPersonController>();
+            director.FindProperty("look").objectReferenceValue = player.GetComponent<FirstPersonLook>();
+            director.FindProperty("interactor").objectReferenceValue = player.GetComponent<CrateInteractor>();
+            director.FindProperty("carrier").objectReferenceValue = player.GetComponent<CrateCarrier>();
+            director.FindProperty("overlay").objectReferenceValue = controls.GetComponentInChildren<TutorialOverlayView>(true);
+            director.FindProperty("arrow").objectReferenceValue = arrow;
+            AssignArray(director.FindProperty("bays"), room.GetComponentsInChildren<Bay>(true));
+            AssignArray(director.FindProperty("launchButtons"), room.GetComponentsInChildren<LaunchButton>(true));
+            director.FindProperty("chute").objectReferenceValue = room.GetComponentInChildren<Chute>(true);
+            director.FindProperty("scanner").objectReferenceValue = room.GetComponentInChildren<ScannerBooth>(true);
+            director.FindProperty("onShiftStarted").objectReferenceValue = FlowAssetFactory.Event<GameEvent>("e_ShiftStarted");
+            director.FindProperty("onShiftEnded").objectReferenceValue = FlowAssetFactory.Event<GameEvent>("e_ShiftEnded");
+            director.FindProperty("onCrateSpawned").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_CrateSpawned");
+            director.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void AssignArray(SerializedProperty array, Object[] values)
+        {
+            array.arraySize = values.Length;
+            for (int i = 0; i < values.Length; i++) array.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
         }
 
         private static void DestroyIfPresent(string name)

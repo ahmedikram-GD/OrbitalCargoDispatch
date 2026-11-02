@@ -59,7 +59,8 @@ namespace OrbitalCargo.Interaction
                                                       config.OutlineWidth * (1f + config.PulseAmount), t));
         }
 
-        private void OnDisable() => SetHighlighted(false);
+        // Pooled crates are disabled on release, so a wrong-bay warning never follows a crate into its next life.
+        private void OnDisable() => SetWarning(false);
 
         private void OnDestroy()
         {
@@ -91,6 +92,17 @@ namespace OrbitalCargo.Interaction
                 r.SetSharedMaterials(MaterialBuffer);
             }
             MaterialBuffer.Clear(); // don't keep materials alive from a static list
+        }
+
+        /// <summary>
+        /// Persistent outline in the config's warning colour (a crate in the wrong bay), or back to the
+        /// normal focus colour and off. Slotted crates are never the interactor's focus, so the two uses
+        /// don't fight over the outline.
+        /// </summary>
+        public void SetWarning(bool on)
+        {
+            if (_fill != null && config != null) _fill.SetColor(OutlineColorId, on ? config.WarningColor : config.OutlineColor);
+            SetHighlighted(on);
         }
 
         // ── Helpers ────────────────────────────────────────────────────────────

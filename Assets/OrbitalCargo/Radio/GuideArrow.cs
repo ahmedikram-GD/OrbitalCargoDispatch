@@ -4,8 +4,9 @@ using UnityEngine;
 namespace OrbitalCargo.Radio
 {
     /// <summary>
-    /// Bobbing, spinning marker that hangs over a station to show the rookie where to go (Bay A during
-    /// Rook's intro). Shown and hidden by <see cref="RookRadio"/>; pure presentation.
+    /// Bobbing, spinning marker that hangs over whatever the rookie should go to next — a crate on the
+    /// belt, its bay, the chute, the scanner, a launch button. Moved, shown and hidden by
+    /// <see cref="TutorialDirector"/>; pure presentation.
     /// </summary>
     [AddComponentMenu("OrbitalCargo/Radio/Guide Arrow")]
     public sealed class GuideArrow : MonoBehaviour
@@ -43,5 +44,12 @@ namespace OrbitalCargo.Radio
         public void Show() => gameObject.SetActive(true);
 
         public void Hide() => gameObject.SetActive(false);
+
+        /// <summary>Hang the arrow at <paramref name="worldPosition"/> (the tip points down at it) and show it.</summary>
+        public void ShowAt(Vector3 worldPosition)
+        {
+            transform.position = worldPosition;
+            if (!IsShown) Show();
+        }
     }
 }

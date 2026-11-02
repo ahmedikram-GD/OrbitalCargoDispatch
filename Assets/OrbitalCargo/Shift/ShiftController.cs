@@ -61,6 +61,9 @@ namespace OrbitalCargo.Shift
         public bool IsRunning { get; private set; }
         public float Remaining => _clock.Remaining;
 
+        /// <summary>Clock and spawn timeline frozen while the onboarding waits for the player (see <see cref="SetHeld"/>).</summary>
+        public bool IsHeld { get; private set; }
+
         // ── Lifecycle ──────────────────────────────────────────────────────────
 
         private void OnEnable()
@@ -81,7 +84,7 @@ namespace OrbitalCargo.Shift
 
         private void Update()
         {
-            if (!IsRunning) return;
+            if (!IsRunning || IsHeld) return;
 
             bool ended = _clock.Tick(Time.deltaTime);
             RaiseTickIfNewSecond();
@@ -102,6 +105,7 @@ namespace OrbitalCargo.Shift
             _clock.Reset(config.ShiftLengthSeconds);
             _lastTickSecond = -1;
             IsRunning = true;
+            SetHeld(false);
 
             if (carrier != null && upgrades != null) carrier.SetCapacity(upgrades.CarryCapacity);
             if (spawner != null) spawner.Begin(session.ShiftNumber <= 1 ? config.Schedule : config.ScheduleShift2);
@@ -110,11 +114,23 @@ namespace OrbitalCargo.Shift
             if (onShiftStarted != null) onShiftStarted.Invoke();
         }
 
+        /// <summary>
+        /// Freeze (or release) the shift clock and the spawn timeline — the tutorial holds the shift while
+        /// it teaches move and look, so the first crate never arrives before the player can walk.
+        /// The belt keeps running.
+        /// </summary>
+        public void SetHeld(bool held)
+        {
+            IsHeld = held;
+            if (spawner != null) spawner.IsHeld = held;
+        }
+
         [Button, DisableInEditorMode]
         public void EndShift()
         {
             if (!IsRunning) return;
             IsRunning = false;
+            SetHeld(false);
 
             if (spawner != null) spawner.Stop();
             SweepCrates();

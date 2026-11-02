@@ -175,6 +175,7 @@ namespace OrbitalCargo.Stations.EditorTools
             so.FindProperty("ghost").objectReferenceValue = ghost;
             so.FindProperty("config").objectReferenceValue = config;
             so.FindProperty("onCratePlaced").objectReferenceValue = onPlaced;
+            so.FindProperty("onWrongBay").objectReferenceValue = CrateAssetFactory.EnsureCrateEvent("e_WrongBay");
             so.ApplyModifiedPropertiesWithoutUndo();
 
             WireLaunch(bayTransform, bay, config);

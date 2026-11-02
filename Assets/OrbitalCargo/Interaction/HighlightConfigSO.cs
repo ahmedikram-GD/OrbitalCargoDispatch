@@ -30,6 +30,8 @@ namespace OrbitalCargo.Interaction
         [ColorUsage(true, true)] public Color OutlineColor = new Color(0.2f, 0.9f, 1f, 1f);
         [Tooltip("Outline thickness in screen space (constant at any distance). ~2–8 reads well.")]
         [Range(0f, 10f)] public float OutlineWidth = 4f;
+        [Tooltip("Outline colour for a crate sitting in the wrong bay (stays on until it launches).")]
+        [ColorUsage(true, true)] public Color WarningColor = new Color(1f, 0.15f, 0.1f, 1f);
         [Tooltip("Depth behaviour. OutlineVisible hides the outline behind walls.")]
         public OutlineMode Mode = OutlineMode.OutlineAll;
 

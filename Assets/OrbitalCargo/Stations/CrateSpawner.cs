@@ -35,11 +35,14 @@ namespace OrbitalCargo.Stations
         public bool IsRunning { get; private set; }
         public int PendingCount => _pending.Count;
 
+        /// <summary>While true the schedule's timeline stands still (the onboarding is waiting on the player).</summary>
+        public bool IsHeld { get; set; }
+
         // ── Lifecycle ──────────────────────────────────────────────────────────
 
         private void Update()
         {
-            if (IsRunning && _scheduler != null)
+            if (IsRunning && !IsHeld && _scheduler != null)
             {
                 Elapsed += Time.deltaTime;
                 _scheduler.Advance(Elapsed, _due);

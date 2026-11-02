@@ -35,6 +35,9 @@ namespace OrbitalCargo.Interaction
         [Header("Prompts")]
         public string PickUpPrompt = "Pick up";
         public string PlacePrompt = "Place";
+        [Tooltip("Shown instead of Place when the carried crate doesn't belong in the aimed-at bay. It still " +
+                 "places (soft failure) — the button turns red so the mistake is obvious before it's made.")]
+        public string WrongBayPrompt = "Wrong bay\n<size=65%>place anyway</size>";
         public string BayFullPrompt = "Bay full";
         public string HandsFullPrompt = "Hands full";
         public string LaunchPrompt = "Launch";

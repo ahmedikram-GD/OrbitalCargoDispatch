@@ -42,6 +42,11 @@ MonoBehaviour:
     Speaker: ROOK
     Text: 'Yellow chevrons: volatile. Bay C, slow and steady.'
     HoldSeconds: 4
+  - Beat: WrongBay
+    Speaker: ROOK
+    Text: "Wrong pad, rookie — crate colour matches the bay. That one ships
+      at half pay."
+    HoldSeconds: 4.5
   - Beat: ShiftStart
     Speaker: ROOK
     Text: "Back for more? Belt's running hot tonight \u2014 keep up."

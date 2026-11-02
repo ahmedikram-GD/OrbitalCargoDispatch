@@ -42,7 +42,10 @@ namespace OrbitalCargo.Interaction
         /// <summary>Whether the current prompt can be acted on.</summary>
         public bool PromptEnabled { get; private set; }
 
-        /// <summary>Raised when the prompt text or its enabled state changes.</summary>
+        /// <summary>The current prompt is allowed but probably a mistake (wrong bay) — shown in red.</summary>
+        public bool PromptIsWarning { get; private set; }
+
+        /// <summary>Raised when the prompt text, its enabled state or its warning flag changes.</summary>
         public event Action<string, bool> PromptChanged;
 
         public Crate FocusedCrate => _focusCrate;
@@ -121,7 +124,8 @@ namespace OrbitalCargo.Interaction
             if (target != null)
             {
                 SetFocus(null, target, hit);
-                SetPrompt(target.Prompt(carrier), target.CanInteract(carrier));
+                bool warning = target is IInteractWarning warn && warn.IsWarning(carrier);
+                SetPrompt(target.Prompt(carrier), target.CanInteract(carrier), warning);
                 _focusPreview?.ShowPreview(carrier, hit);
                 return;
             }
@@ -172,12 +176,13 @@ namespace OrbitalCargo.Interaction
             SetPrompt(string.Empty, false);
         }
 
-        private void SetPrompt(string text, bool enabled)
+        private void SetPrompt(string text, bool enabled, bool warning = false)
         {
             text ??= string.Empty;
-            if (text == Prompt && enabled == PromptEnabled) return;
+            if (text == Prompt && enabled == PromptEnabled && warning == PromptIsWarning) return;
             Prompt = text;
             PromptEnabled = enabled;
+            PromptIsWarning = warning;
             PromptChanged?.Invoke(text, enabled);
         }
     }

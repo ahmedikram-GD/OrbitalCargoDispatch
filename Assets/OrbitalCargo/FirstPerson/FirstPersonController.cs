@@ -31,6 +31,12 @@ namespace OrbitalCargo.FirstPerson
         /// <summary>True while at least one pause request is outstanding.</summary>
         public bool IsPaused => _pauseCount > 0;
 
+        /// <summary>
+        /// While true, look input is ignored (movement still works) — the tutorial's camera nudge owns
+        /// the view for a moment and the player's thumb would otherwise fight it.
+        /// </summary>
+        public bool IsLookSuppressed { get; set; }
+
         // ── Lifecycle ──────────────────────────────────────────────────────────
 
         private void Awake()
@@ -62,7 +68,7 @@ namespace OrbitalCargo.FirstPerson
             if (_input == null || _pauseCount > 0) return;
 
             // Look runs in Update for the smoothest aim (frame-rate look, not physics step).
-            _look?.Look(_input.Look);
+            if (!IsLookSuppressed) _look?.Look(_input.Look);
 
             if (_input.JumpPressed) _motor?.Jump();
             _motor?.Move(_input.Move, _input.SprintHeld, _input.CrouchHeld);

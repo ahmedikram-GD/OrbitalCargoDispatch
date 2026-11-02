@@ -11,10 +11,12 @@ namespace OrbitalCargo.Stations
     /// A shuttle bay: six slots on a colour-coded pad. Adapts the pure <see cref="BayModel"/> to the
     /// scene — aiming at the pad (or a crate already on it) with a crate in hand offers "Place",
     /// previews the nearest free slot with the ghost, and snaps the crate there. Any crate may go in
-    /// any bay; a wrong bay just pays less at launch (soft failure, GDD).
+    /// any bay; a wrong bay just pays less at launch (soft failure, GDD) — but it is never silent: the
+    /// ghost and context button turn red while aiming, and e_WrongBay fires on placement so the juice
+    /// presenter and Rook can call it out.
     /// </summary>
     [AddComponentMenu("OrbitalCargo/Stations/Bay")]
-    public sealed class Bay : MonoBehaviour, IInteractable, IInteractPreview
+    public sealed class Bay : MonoBehaviour, IInteractable, IInteractPreview, IInteractWarning
     {
         [SerializeField] private BayId id;
         [Tooltip("Slots in index order (built by StationWiring from RoomLayoutSO).")]
@@ -26,6 +28,8 @@ namespace OrbitalCargo.Stations
         [Header("Events")]
         [Tooltip("e_CratePlaced. Raised after a crate is put on a slot. Optional.")]
         [SerializeField] private GameEventWithCrate onCratePlaced;
+        [Tooltip("e_WrongBay. Raised after a crate is put in a bay that isn't its destination. Optional.")]
+        [SerializeField] private GameEventWithCrate onWrongBay;
 
         private BayModel _model;
         private Vector3[] _slotPositions;
@@ -63,7 +67,8 @@ namespace OrbitalCargo.Stations
         public string Prompt(CrateCarrier carrier)
         {
             if (carrier == null || !carrier.HasCrate || config == null || IsLocked) return string.Empty;
-            return _model.IsFull ? config.BayFullPrompt : config.PlacePrompt;
+            if (_model.IsFull) return config.BayFullPrompt;
+            return IsWrongFor(carrier.Top) ? config.WrongBayPrompt : config.PlacePrompt;
         }
 
         public bool CanInteract(CrateCarrier carrier) => carrier != null && carrier.HasCrate && !_model.IsFull && !IsLocked;
@@ -80,7 +85,7 @@ namespace OrbitalCargo.Stations
         {
             if (ghost == null) return;
             if (CanInteract(carrier) && _model.TryGetNearestFreeSlot(hit.point, _slotPositions, out int slot))
-                ghost.Show(slots[slot].Anchor);
+                ghost.Show(slots[slot].Anchor, IsWrongFor(carrier.Top));
             else
                 ghost.Hide();
         }
@@ -89,6 +94,10 @@ namespace OrbitalCargo.Stations
         {
             if (ghost != null) ghost.Hide();
         }
+
+        // ── IInteractWarning ───────────────────────────────────────────────────
+
+        public bool IsWarning(CrateCarrier carrier) => CanInteract(carrier) && IsWrongFor(carrier.Top);
 
         // ── Public API ─────────────────────────────────────────────────────────
 
@@ -128,6 +137,9 @@ namespace OrbitalCargo.Stations
 
             Changed?.Invoke(this);
             if (onCratePlaced != null) onCratePlaced.Raise(crate);
+            if (IsWrongFor(crate) && onWrongBay != null) onWrongBay.Raise(crate);
         }
+
+        private bool IsWrongFor(Crate crate) => crate != null && crate.Type != null && !crate.Type.BelongsIn(id);
     }
 }

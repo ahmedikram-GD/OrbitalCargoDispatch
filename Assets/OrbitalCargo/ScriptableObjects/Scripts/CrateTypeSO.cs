@@ -45,5 +45,8 @@ namespace OrbitalCargo.Config
         [Range(0.1f, 1f)] public float VolatileSlowMultiplier = 1f;
         [Tooltip("Volatile: hold-point wobble amplitude in metres while carried (0 = steady).")]
         [Min(0f)] public float WobbleAmplitude;
+
+        /// <summary>True when <paramref name="bay"/> is this crate's destination (false = wrong bay, pays less).</summary>
+        public bool BelongsIn(BayId bay) => Destination == bay;
     }
 }

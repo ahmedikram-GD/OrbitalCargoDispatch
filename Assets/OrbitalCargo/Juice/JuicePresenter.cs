@@ -6,6 +6,7 @@ using OrbitalCargo.Config;
 using OrbitalCargo.Crates;
 using OrbitalCargo.Economy;
 using OrbitalCargo.FirstPerson;
+using OrbitalCargo.Interaction;
 using OrbitalCargo.Radio;
 using THEBADDEST.SoundSystem;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace OrbitalCargo.Juice
     /// <summary>
     /// The one place gameplay events become feedback (the kit's "presenter" role): sounds, haptics,
     /// particles, world pop-ups, prop wobbles, camera shake and camera kicks. Gameplay code only raises
-    /// events; this listens. Covers the crate loop (pick, place, throw, chute, scan, cryo), launches,
+    /// events; this listens. Covers the crate loop (pick, place, wrong bay, throw, chute, scan, cryo), launches,
     /// news, the shift flow buttons and Rook's radio blip.
     /// </summary>
     [AddComponentMenu("OrbitalCargo/Juice/Juice Presenter")]
@@ -41,6 +42,8 @@ namespace OrbitalCargo.Juice
         [Header("Events")]
         [SerializeField] private GameEventWithCrate onCratePicked;
         [SerializeField] private GameEventWithCrate onCratePlaced;
+        [Tooltip("e_WrongBay — raised by a bay after a crate lands in the wrong one.")]
+        [SerializeField] private GameEventWithCrate onWrongBay;
         [SerializeField] private GameEventWithLaunchResult onShuttleLaunched;
         [SerializeField] private GameEventWithCrate onCryoExpired;
         [SerializeField] private GameEventWithCrate onCrateThrown;
@@ -82,6 +85,7 @@ namespace OrbitalCargo.Juice
         {
             if (onCratePicked != null) onCratePicked.Subscribe(HandleCratePicked);
             if (onCratePlaced != null) onCratePlaced.Subscribe(HandleCratePlaced);
+            if (onWrongBay != null) onWrongBay.Subscribe(HandleWrongBay);
             if (onShuttleLaunched != null) onShuttleLaunched.Subscribe(HandleShuttleLaunched);
             if (onCryoExpired != null) onCryoExpired.Subscribe(HandleCryoExpired);
             if (onCrateThrown != null) onCrateThrown.Subscribe(HandleCrateThrown);
@@ -100,6 +104,7 @@ namespace OrbitalCargo.Juice
         {
             if (onCratePicked != null) onCratePicked.UnSubscribe(HandleCratePicked);
             if (onCratePlaced != null) onCratePlaced.UnSubscribe(HandleCratePlaced);
+            if (onWrongBay != null) onWrongBay.UnSubscribe(HandleWrongBay);
             if (onShuttleLaunched != null) onShuttleLaunched.UnSubscribe(HandleShuttleLaunched);
             if (onCryoExpired != null) onCryoExpired.UnSubscribe(HandleCryoExpired);
             if (onCrateThrown != null) onCrateThrown.UnSubscribe(HandleCrateThrown);
@@ -132,6 +137,18 @@ namespace OrbitalCargo.Juice
             // e_CratePlaced fires as the snap starts. Wobbling mid-snap would make the punch tween restore
             // a pre-landing pose, so wait for the crate to actually land (frame-rate independent).
             StartCoroutine(WobbleWhenLanded(crate));
+        }
+
+        // Wrong bay still pays (half) — so the mistake has to be loud: buzz, red pop-up, and a red
+        // outline that stays on the crate until its shuttle leaves.
+        private void HandleWrongBay(Crate crate)
+        {
+            if (sound != null) sound.Play("ScanBad");
+            if (haptics != null) haptics.ApplyHapticFeedback(HapticIntensity.Failure);
+            if (crate == null) return;
+            Popup("WRONG BAY!", badColor, crate.transform.position);
+            var outline = crate.GetComponent<HighlightableItem>();
+            if (outline != null) outline.SetWarning(true);
         }
 
         private void HandleCryoExpired(Crate crate)

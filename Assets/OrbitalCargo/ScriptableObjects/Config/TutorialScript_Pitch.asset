@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f53eb0dcac51a414d9ab95251f96eddb, type: 3}
+  m_Name: TutorialScript_Pitch
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalCargo.Radio.TutorialScriptSO
+  MoveCard:
+    Title: MOVE AROUND
+    Body: Use your <color=#9CFF57>left thumb</color> to move around.
+    KeyboardBody: Use <color=#9CFF57>W A S D</color> to move around.
+  MoveDistance: 2.5
+  LookCard:
+    Title: LOOK AROUND
+    Body: Drag your <color=#9CFF57>right thumb</color> to look around.
+    KeyboardBody: Drag with the <color=#9CFF57>mouse</color> to look around.
+  LookDegrees: 120
+  CardClearDelay: 0.6
+  AimSeconds: 0.9
+  AimSharpness: 5
+  ArrowAboveCrate: 1.3
+  ArrowAboveBay: 4.3
+  ArrowAboveChute: 1.4
+  ArrowAboveScanner: 3.6
+  ArrowAboveLaunchButton: 2
+  CrateLessons:
+  - Key: standard
+    Title: GREY CRATE
+    FetchText: "Grey crate on the belt \u2014 walk up and grab it."
+    DeliverText: "Grey crates go to <color=#9DB6D9><b>BAY A</b></color> \u2014 the
+      grey pad. Match the colours!"
+    CleanText: 
+    BadText: 
+    ShowThrowGesture: 0
+  - Key: cryo
+    Title: CRYO CRATE
+    FetchText: "White crate with a blue ring \u2014 it's thawing. Grab it, quick!"
+    DeliverText: "White crates go to <color=#CCF2FF><b>BAY B</b></color> \u2014 before
+      the ring runs out."
+    CleanText: 
+    BadText: 
+    ShowThrowGesture: 0
+  - Key: junk
+    Title: JUNK
+    FetchText: "Rusty junk \u2014 nobody pays to ship that. Grab it."
+    DeliverText: Swipe up (Space) to throw it down the <color=#FF7A3D><b>CHUTE</b></color>.
+    CleanText: 
+    BadText: 
+    ShowThrowGesture: 1
+  - Key: volatile
+    Title: VOLATILE CRATE
+    FetchText: "Yellow chevrons \u2014 volatile. Pick it up gently."
+    DeliverText: "Yellow crates go to <color=#FFCC1A><b>BAY C</b></color>. You'll
+      walk slower \u2014 steady!"
+    CleanText: 
+    BadText: 
+    ShowThrowGesture: 0
+  - Key: suspicious
+    Title: SUSPICIOUS CRATE
+    FetchText: "That crate is shaking and dripping goo\u2026 grab it."
+    DeliverText: Take it to the <color=#7CFF9B><b>SCANNER</b></color> booth before
+      it ships.
+    CleanText: Clean! Grab it and ship it to its colour's bay.
+    BadText: Contraband! Grab it and dump it down the <color=#FF7A3D><b>CHUTE</b></color>.
+    ShowThrowGesture: 0
+  LaunchLesson:
+    Key: launch
+    Title: BAY FULL
+    FetchText: 
+    DeliverText: Hit the green <color=#7CFF9B><b>LAUNCH</b></color> button by the
+      pad!
+    CleanText: 
+    BadText: 
+    ShowThrowGesture: 0
+  LaunchColor: {r: 0.2, g: 1, b: 0.4, a: 1}
