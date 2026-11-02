@@ -1,0 +1,48 @@
+{
+  "formatVersion": 1,
+  "units": "metres",
+  "coordinates": "glTF right-handed, +Y up",
+  "threeVersionTested": "0.128.0",
+  "assets": [
+    {
+      "id": "crate-standard",
+      "url": "models/crate-standard.glb",
+      "pivot": "bottom",
+      "triangles": 6864,
+      "materialCount": 1,
+      "textureMaxSize": 1024,
+      "bytes": 1564588,
+      "sha256": "7f6f56c1689dab62b69ffeecf69c8d3438f403774978206ff756248799e38644"
+    },
+    {
+      "id": "floor-2m",
+      "url": "models/floor-2m.glb",
+      "pivot": "deck-top",
+      "triangles": 216,
+      "materialCount": 1,
+      "textureMaxSize": 1024,
+      "bytes": 2072604,
+      "sha256": "f1e294ed7a29bd58ab30ed82008e4d33b277b3ff171bc2163b8224f4971dce59"
+    },
+    {
+      "id": "wall-2m",
+      "url": "models/wall-2m.glb",
+      "pivot": "bottom",
+      "triangles": 2484,
+      "materialCount": 1,
+      "textureMaxSize": 1024,
+      "bytes": 2153860,
+      "sha256": "db3c5a7d6e5b1bebbbfb166143353179175ed73cd5dd20b1909d698d08a02911"
+    },
+    {
+      "id": "fixture-160cm",
+      "url": "models/fixture-160cm.glb",
+      "pivot": "ceiling-mount",
+      "triangles": 1728,
+      "materialCount": 1,
+      "textureMaxSize": 1024,
+      "bytes": 2125664,
+      "sha256": "cd4f5fe668a7898001cfa5d78c2102fdc64b8b86c4a6635d263b9a9d981730e0"
+    }
+  ]
+}

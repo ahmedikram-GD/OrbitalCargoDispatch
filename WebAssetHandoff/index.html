@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orbital Cargo · Web Asset Preview</title>
+  <link rel="stylesheet" href="preview.css">
+</head>
+<body>
+  <canvas id="view" aria-label="Interactive 3D preview of the exported orbital cargo assets"></canvas>
+  <header>
+    <span class="eyebrow">ORBITAL CARGO DISPATCH</span>
+    <h1>Industrial asset preview</h1>
+    <p>The authored models, running directly in your browser.</p>
+  </header>
+  <div class="tools">
+    <label for="focus">Inspect</label>
+    <select id="focus">
+      <option value="room">Dock corner</option>
+      <option value="crate-standard">Cargo crate</option>
+      <option value="floor-2m">Metal deck</option>
+      <option value="wall-2m">Wall panel</option>
+      <option value="fixture-160cm">Light fixture</option>
+    </select>
+    <button id="reset" type="button">Reset view</button>
+  </div>
+  <footer><span id="status" role="status">Loading assets…</span><span>Drag to orbit · Scroll to zoom</span></footer>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+  <script src="vendor/OrbitControls.js"></script>
+  <script src="orbital-assets.js"></script>
+  <script src="preview.js"></script>
+</body>
+</html>
