@@ -20,6 +20,13 @@ namespace OrbitalCargo.Crates
         [Tooltip("Where a hidden item's model is spawned (HiddenItem child, crate centre).")]
         [SerializeField] private Transform hiddenAnchor;
 
+        [Header("Detailed art variant")]
+        [Tooltip("Type using the authored exterior. Other types keep their existing colour-coded look.")]
+        [SerializeField] private CrateTypeSO detailedType;
+        [SerializeField] private GameObject detailedModel;
+        [Tooltip("Legacy corner/label renderers hidden with the detailed exterior and during X-ray.")]
+        [SerializeField] private Renderer[] legacyDetails;
+
         private MaterialPropertyBlock _block;
         private CrateTypeSO _type;
         private GameObject _hiddenModel;
@@ -46,9 +53,17 @@ namespace OrbitalCargo.Crates
         public void SetXRay(bool on, Material xrayMaterial)
         {
             IsXRay = on && xrayMaterial != null;
+            bool useDetailed = detailedModel != null && detailedType != null && _type == detailedType;
+            if (detailedModel != null) detailedModel.SetActive(useDetailed && !IsXRay);
             if (casing != null)
+            {
                 casing.sharedMaterial = IsXRay ? xrayMaterial : (_type != null ? _type.CasingMaterial : casing.sharedMaterial);
-            if (stripe != null) stripe.enabled = !IsXRay;
+                casing.enabled = !useDetailed || IsXRay;
+            }
+            if (stripe != null) stripe.enabled = !IsXRay && !useDetailed;
+            if (legacyDetails != null)
+                foreach (var detail in legacyDetails)
+                    if (detail != null) detail.enabled = !IsXRay && !useDetailed;
         }
 
         /// <summary>Spawn <paramref name="item"/>'s model inside the crate (once). No-op for a clean crate.</summary>

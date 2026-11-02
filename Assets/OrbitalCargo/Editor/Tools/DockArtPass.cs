@@ -82,6 +82,8 @@ namespace OrbitalCargo.Room.EditorTools
             Conveyor(layout, room, root);
             HeroDockArt.Apply(room, root);
             Lighting(root);
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(BlenderCrateArtPass.ModelPath) != null)
+                BlenderCrateArtPass.EnsureDockReflection(root);
             // Later bays retain their original shapes and colour coding during this first section pass.
             foreach (string id in new[] { "B", "C" })
             {
@@ -283,6 +285,7 @@ namespace OrbitalCargo.Room.EditorTools
             }
             Combine(art, "Cargo");
             foreach (var t in art.GetComponentsInChildren<Transform>()) t.gameObject.isStatic = false;
+            BlenderCrateArtPass.ApplyToRoot(root);
         }
 
         private static Transform Group(string name, Transform parent)
