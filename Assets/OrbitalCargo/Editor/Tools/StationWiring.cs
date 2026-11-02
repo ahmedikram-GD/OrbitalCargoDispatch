@@ -43,6 +43,7 @@ namespace OrbitalCargo.Stations.EditorTools
             WireConveyor(room);
             WireChute(layout, room, config);
             WireBooth(room, config);
+            DockArtPass.FinishStationStyling(layout, room);
         }
 
         // Slice 5: the scanner booth reveal.

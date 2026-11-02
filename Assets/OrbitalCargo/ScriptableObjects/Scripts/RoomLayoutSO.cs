@@ -108,6 +108,10 @@ namespace OrbitalCargo.Config
         [Tooltip("Set dressing: computers, containers, pipes... Visual only.")]
         public PropPlacement[] Props = Array.Empty<PropPlacement>();
 
+        [Header("Dock visual direction")]
+        [Tooltip("Optional procedural dock skin. Empty preserves the original room art.")]
+        public DockArtDirectionSO ArtDirection;
+
         /// <summary>Total slot count per bay (columns × rows).</summary>
         public int SlotsPerBay => SlotColumns * SlotRows;
 

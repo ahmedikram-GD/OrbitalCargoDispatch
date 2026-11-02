@@ -15,7 +15,7 @@ MonoBehaviour:
   Id: standard
   DisplayName: Standard
   CasingMaterial: {fileID: 2100000, guid: 447e88fed140a5e4ca1a9710b11fc5b4, type: 2}
-  AccentColor: {r: 0.1, g: 0.1, b: 0.12, a: 1}
+  AccentColor: {r: 0.12, g: 0.85, b: 1, a: 1}
   Destination: 0
   Payout: 10
   IsJunk: 0

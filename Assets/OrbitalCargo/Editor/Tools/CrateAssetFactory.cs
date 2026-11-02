@@ -211,6 +211,8 @@ namespace OrbitalCargo.Crates.EditorTools
 
             BuildSuspiciousTell(root, crate, casing.transform, stripe.transform);
 
+            DockArtPass.StyleCrate(root);
+
             Directory.CreateDirectory(Path.GetDirectoryName(CratePrefabPath));
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, CratePrefabPath);
             Object.DestroyImmediate(root);

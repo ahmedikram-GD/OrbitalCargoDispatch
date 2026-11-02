@@ -24,6 +24,7 @@ namespace OrbitalCargo.Room.EditorTools
             if (layout.WallPanel != null) SkinWalls(layout, room, skin);
             if (layout.ShuttleModel != null) SkinShuttles(layout, room);
             SkinProps(layout, skin);
+            DockArtPass.ApplyRoom(layout, room);
         }
 
         // ── Floor ──────────────────────────────────────────────────────────────

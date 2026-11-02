@@ -104,3 +104,4 @@ MonoBehaviour:
     Position: {x: 7.85, y: 1.4, z: -1.2}
     Yaw: -90
     Scale: 2.5
+  ArtDirection: {fileID: 11400000, guid: cb8f862f8674cf34fb8ed78045f8f3ea, type: 2}
