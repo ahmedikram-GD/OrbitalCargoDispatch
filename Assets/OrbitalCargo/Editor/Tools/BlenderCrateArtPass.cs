@@ -99,7 +99,12 @@ namespace OrbitalCargo.Room.EditorTools
             }
             float scale = 1f / Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
             skin.transform.localScale = Vector3.one * scale;
-            skin.transform.localPosition = -bounds.center * scale;
+            // Bounds are in the FBX root's space, which is rotated (Blender Z-up), so rotate the offset
+            // into casing space. The casing collider is a unit cube on its origin; -0.5 is the crate's
+            // floor, so the mesh sits on belts/slots instead of centring (and floating) inside the box.
+            var center = skin.transform.localRotation * bounds.center * scale;
+            float halfHeight = Mathf.Abs((skin.transform.localRotation * bounds.size).y) * scale * 0.5f;
+            skin.transform.localPosition = new Vector3(-center.x, -0.5f + halfHeight - center.y, -center.z);
             foreach (var t in skin.GetComponentsInChildren<Transform>()) t.gameObject.isStatic = false;
             var visuals = root.GetComponent<CrateVisuals>();
             var so = new SerializedObject(visuals);
