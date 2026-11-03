@@ -1,0 +1,60 @@
+{
+  "formatVersion": 1,
+  "units": "metres",
+  "coordinates": "glTF +Y up, fronts +Z",
+  "textures": {
+    "atlas": 1024,
+    "belt": 256,
+    "opaquePBR": "baseColor + packed ORM + emissive",
+    "glass": "alpha BLEND; single-sided; no transmission"
+  },
+  "triangleBudgetTotal": 15000,
+  "trianglesTotal": 8336,
+  "assets": [
+    {
+      "id": "conveyor",
+      "url": "models/conveyor.glb",
+      "triangles": 3426,
+      "triangleBudget": 5500,
+      "meshPrimitives": 3,
+      "dimensionsXYZ": [
+        5.695,
+        1.115,
+        1.36
+      ],
+      "bytes": 389652,
+      "sha256": "99285d5bf30bab6e9858b7761a9272db7932ea1a81a9cf8d7ab8b5885f4d9a01",
+      "notes": "Metres; floor pivot; cargo surface Y=.85; travel +X. Belt and intake guard are named separate nodes. Belt UV V runs along travel."
+    },
+    {
+      "id": "scanner",
+      "url": "models/scanner.glb",
+      "triangles": 2386,
+      "triangleBudget": 5500,
+      "meshPrimitives": 3,
+      "dimensionsXYZ": [
+        2.525,
+        2.83,
+        1.829
+      ],
+      "bytes": 328260,
+      "sha256": "411d43e772c9d719d26e685df3e4f2a5db7ac76ea062b8dc8eb5e7df5fa54121",
+      "notes": "Front is +Z; floor pivot; cargo slot Y=.255. Three single-sided glass panes, open front. ScanBeam node translates vertically. No transmission extension or real-time lights."
+    },
+    {
+      "id": "disposal-chute",
+      "url": "models/disposal-chute.glb",
+      "triangles": 2524,
+      "triangleBudget": 4000,
+      "meshPrimitives": 1,
+      "dimensionsXYZ": [
+        2.8,
+        2.2225,
+        2.8
+      ],
+      "bytes": 343952,
+      "sha256": "0fd5e585e6db23b195755d7ddc061ead404f96a1359a01f64ba65c90157a8039",
+      "notes": "Deck-plane pivot Y=0. Open throat extends down .9 m; floor must have an opening. Hole diameter 1.98 m; outer flange diameter 2.8 m. Front is +Z."
+    }
+  ]
+}

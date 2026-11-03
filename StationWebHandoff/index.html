@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Orbital Cargo · Station Models</title><link rel="stylesheet" href="preview.css"></head>
+<body><canvas id="view" aria-label="Interactive station model preview"></canvas>
+<header><span class="eyebrow">ORBITAL CARGO DISPATCH</span><h1>Station models</h1><p id="detail">Loading reference-led mobile models…</p></header>
+<div class="tools"><label for="focus">Inspect</label><select id="focus"><option value="scanner">Scanner booth</option><option value="conveyor">Conveyor</option><option value="disposal-chute">Disposal chute</option></select><button id="reset">Reset view</button><label><input type="checkbox" id="motion" checked> Motion</label><label><input type="checkbox" id="shadows"> Shadows</label></div>
+<footer><span id="status" role="status">Loading models…</span><span id="metrics"></span><span>Drag to orbit · Scroll to zoom</span></footer>
+<script src="vendor/three.min.js"></script><script src="vendor/GLTFLoader.js"></script><script src="vendor/OrbitControls.js"></script><script src="station-assets.js"></script><script src="preview.js"></script></body></html>

@@ -1,0 +1,1 @@
+Read CLAUDE_HANDOFF.md for integration details. Run START_PREVIEW.cmd to inspect the actual GLBs in a browser. The source folder contains the packed Blender scene and regeneration scripts. Models are separate from the existing game; no gameplay logic has been replaced.
