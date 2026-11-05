@@ -1,0 +1,64 @@
+{
+  "formatVersion": 1,
+  "units": "metres",
+  "coordinates": "glTF +Y up, fronts +Z",
+  "textures": {
+    "atlas": 1024,
+    "belt": 256,
+    "opaquePBR": "baseColor + packed ORM + emissive",
+    "glass": "alpha BLEND; single-sided; no transmission"
+  },
+  "triangleBudgetTotal": 15000,
+  "trianglesTotal": 11304,
+  "assets": [
+    {
+      "id": "conveyor",
+      "url": "models/conveyor.gltf.json",
+      "triangles": 4838,
+      "triangleBudget": 5500,
+      "meshPrimitives": 3,
+      "dimensionsXYZ": [
+        5.84,
+        1.115,
+        1.36
+      ],
+      "bytes": 624132,
+      "sha256": "4dd3786ea39799fddc4b07f76a880b9b8cf002719341932538706e73b951a259",
+      "notes": "Metres; floor pivot; cargo surface Y=.85; travel +X. Belt and intake guard are named separate nodes. Belt UV V runs along travel.",
+      "sourceGlb": "models/conveyor.glb"
+    },
+    {
+      "id": "scanner",
+      "url": "models/scanner.gltf.json",
+      "triangles": 3090,
+      "triangleBudget": 5500,
+      "meshPrimitives": 3,
+      "dimensionsXYZ": [
+        2.6,
+        2.8875,
+        1.905
+      ],
+      "bytes": 533164,
+      "sha256": "a712075bd9c51ff6f04cd225ab3de60f96c3d7498674645f4e527a23edc4ecec",
+      "notes": "Front is +Z; floor pivot; cargo slot Y=.255. Three single-sided glass panes, open front. ScanBeam node translates vertically. No transmission extension or real-time lights.",
+      "sourceGlb": "models/scanner.glb"
+    },
+    {
+      "id": "disposal-chute",
+      "url": "models/disposal-chute.gltf.json",
+      "triangles": 3376,
+      "triangleBudget": 4000,
+      "meshPrimitives": 1,
+      "dimensionsXYZ": [
+        2.8,
+        2.2225,
+        2.8
+      ],
+      "bytes": 560516,
+      "sha256": "25790bd2963b5b6d54b766fb7d1e46ee23d95081e14bd9334055a678a0420540",
+      "notes": "Deck-plane pivot Y=0. Open throat extends down .9 m; floor must have an opening. Hole diameter 1.98 m; outer flange diameter 2.8 m. Front is +Z.",
+      "sourceGlb": "models/disposal-chute.glb"
+    }
+  ],
+  "webFormat": "Text glTF converted from the V3 GLBs (artifact hosting serves .json/.png, not .glb); same meshes, materials and maps."
+}
